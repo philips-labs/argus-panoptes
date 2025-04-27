@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-cloudfoundry
+  description: Allows you to configure a Cloud Foundry environment declaratively using HCL.
+  annotations:
+    github.com/project-slug: philips-labs/terraform-provider-cloudfoundry
+    backstage.io/source-location: url:https://github.com/philips-labs/terraform-provider-cloudfoundry
+spec:
+  type: service
+  lifecycle: experimental
+  owner: philips-labs

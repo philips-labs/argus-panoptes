@@ -78,21 +78,38 @@ catalog:
   rules:
     - allow: [Component, System, API, Resource, Location]
   locations:
-    # Local example data, file locations are relative to the backend process, typically `packages/backend`
-    - type: file
-      target: ../../examples/entities.yaml
+    # File locations are relative to the backend process, typically `packages/backend`
 
-    # Local example template
+    # Philips Labs repos
     - type: file
-      target: ../../examples/template/template.yaml
-      rules:
-        - allow: [Template]
+      target: ../../catalogs/tabia-catalog-info.yaml
 
-    # Local example organizational data
     - type: file
-      target: ../../examples/org.yaml
-      rules:
-        - allow: [User, Group]
+      target: ../../catalogs/slsa-provenance-action-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/fatt-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/dct-notary-admin-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/terraform-registry-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/s3dl-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/workflow-capability-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/terraform-provider-cloudfoundry-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/terraform-provider-unleash-catalog-info.yaml
+
+    - type: file
+      target: ../../catalogs/spiffe-vault-catalog-info.yaml
 
     ## Uncomment these lines to add more example data
     # - type: url

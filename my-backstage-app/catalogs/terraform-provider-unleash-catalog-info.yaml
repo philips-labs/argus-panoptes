@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-unleash
+  description: A Terraform provider to provision and manage Unleash admin resources.
+  annotations:
+    github.com/project-slug: philips-labs/terraform-provider-unleash
+    backstage.io/source-location: url:https://github.com/philips-labs/terraform-provider-unleash
+spec:
+  type: service
+  lifecycle: experimental
+  owner: philips-labs

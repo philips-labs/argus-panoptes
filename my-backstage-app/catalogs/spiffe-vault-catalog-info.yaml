@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: spiffe-vault
+  description: Integrates SPIFFE SVID authentication with Hashicorp Vault to retrieve a VAULT_TOKEN.
+  annotations:
+    github.com/project-slug: philips-labs/spiffe-vault
+    backstage.io/source-location: url:https://github.com/philips-labs/spiffe-vault
+spec:
+  type: service
+  lifecycle: experimental
+  owner: philips-labs

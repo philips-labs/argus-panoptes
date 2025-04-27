@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dct-notary-admin
+  description: Adds the capability to manage your Docker Content Trust and notary certificates.
+  annotations:
+    github.com/project-slug: philips-labs/dct-notary-admin
+    backstage.io/source-location: url:https://github.com/philips-labs/dct-notary-admin
+spec:
+  type: service
+  lifecycle: experimental
+  owner: philips-labs
