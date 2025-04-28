@@ -50,5 +50,8 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@4.4.1"
+  "packageManager": "yarn@4.4.1",
+  "dependencies": {
+    "@mui/icons-material": "^7.0.2"
+  }
 }
