@@ -1,4 +1,4 @@
-import { Typography, Grid } from '@material-ui/core';
+import { Typography, Grid, Box } from '@material-ui/core';
 import {
   InfoCard,
   Header,
@@ -32,6 +32,20 @@ export const ExampleComponent = () => (
           <ExampleFetchComponent />
         </Grid>
       </Grid>
+      <Box display="flex" justifyContent="space-around" alignItems="center" mt={4}>
+      <div style={{
+        width: 100,
+        height: 100,
+        borderRadius: '50%',
+        backgroundColor: 'red',
+      }} />
+      <div style={{
+        width: 100,
+        height: 100,
+        borderRadius: '50%',
+        backgroundColor: 'green',
+      }} />
+    </Box>
     </Content>
   </Page>
 );
