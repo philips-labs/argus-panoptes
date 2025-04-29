@@ -7,6 +7,7 @@ import {
   Select,
   InputLabel,
   FormControl,
+  Tooltip,
 } from '@material-ui/core';
 import {
   Header,
@@ -74,11 +75,25 @@ export const TrafficComponent = () => {
               <Grid item xs={12} md={6}>
                 <InfoCard title="Security Checks">
                   <Typography variant="subtitle1">Dependabot</Typography>
-                  <TrafficLight color={statusData?.Dependabot || 'yellow'} />
+                  <Tooltip title={statusData?.Dependabot?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.Dependabot?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
+
                   <Typography variant="subtitle1">BlackDuck</Typography>
-                  <TrafficLight color={statusData?.BlackDuck || 'yellow'} />
+                  <Tooltip title={statusData?.BlackDuck?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.BlackDuck?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
+
                   <Typography variant="subtitle1">Fortify</Typography>
-                  <TrafficLight color={statusData?.Fortify || 'yellow'} />
+                  <Tooltip title={statusData?.Fortify?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.Fortify?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
                 </InfoCard>
               </Grid>
 
@@ -86,39 +101,54 @@ export const TrafficComponent = () => {
               <Grid item xs={12} md={6}>
                 <InfoCard title="Software Quality">
                   <Typography variant="subtitle1">SonarQube</Typography>
-                  <TrafficLight color={statusData?.SonarQube || 'yellow'} />
+                  <Tooltip title={statusData?.SonarQube?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.SonarQube?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
+
                   <Typography variant="subtitle1">CodeScene</Typography>
-                  <TrafficLight color={statusData?.CodeScene || 'yellow'} />
+                  <Tooltip title={statusData?.CodeScene?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.CodeScene?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
                 </InfoCard>
               </Grid>
 
               {/* Reporting Pipelines */}
               <Grid item xs={12} md={6}>
                 <InfoCard title="Reporting Pipelines">
-                  <Typography variant="subtitle1">
-                    Reporting Pipeline
-                  </Typography>
-                  <TrafficLight color={statusData?.['Reporting Pipeline'] || 'yellow'} />
+                  <Typography variant="subtitle1">Reporting Pipeline</Typography>
+                  <Tooltip title={statusData?.['Reporting Pipeline']?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.['Reporting Pipeline']?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
                 </InfoCard>
               </Grid>
 
-              {/* Environment */}
+              {/* Pre-Production Environment */}
               <Grid item xs={12} md={6}>
-                <InfoCard title="Pre-Production Environment status">
-                  <Typography variant="subtitle1">
-                    Pre-Production pipelines
-                  </Typography>
-                  <TrafficLight color={statusData?.['Pre-Production pipelines'] || 'yellow'} />
+                <InfoCard title="Pre-Production Environment Status">
+                  <Typography variant="subtitle1">Pre-Production pipelines</Typography>
+                  <Tooltip title={statusData?.['Pre-Production pipelines']?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.['Pre-Production pipelines']?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
                 </InfoCard>
               </Grid>
 
-              {/* Foundation pipelines */}
+              {/* Foundation Pipelines */}
               <Grid item xs={12} md={6}>
-                <InfoCard title="Foundation pipelines">
-                  <Typography variant="subtitle1">
-                    Foundation Pipelines
-                  </Typography>
-                  <TrafficLight color={statusData?.['Foundation Pipelines'] || 'yellow'} />
+                <InfoCard title="Foundation Pipelines">
+                  <Typography variant="subtitle1">Foundation Pipelines</Typography>
+                  <Tooltip title={statusData?.['Foundation Pipelines']?.reason || ''}>
+                    <div>
+                      <TrafficLight color={statusData?.['Foundation Pipelines']?.color || 'yellow'} />
+                    </div>
+                  </Tooltip>
                 </InfoCard>
               </Grid>
             </Grid>
