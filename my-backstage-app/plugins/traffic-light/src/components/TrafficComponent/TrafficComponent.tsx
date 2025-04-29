@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Grid,
@@ -17,16 +17,24 @@ import {
 } from '@backstage/core-components';
 import { RepoFetchComponent } from '../RepoFetchComponent';
 
+import { fetchRepoStatus, StatusResponse } from '../api/mockStatusApi';
+
 const TrafficLight = ({ color }: { color: 'red' | 'green' | 'yellow' }) => (
   <Box my={1} width={20} height={20} borderRadius="50%" bgcolor={color} />
 );
 
 export const TrafficComponent = () => {
-  const [repos, setRepos] = useState<{ name: string; description: string }[]>(
-    [],
-  );
+  const [repos, setRepos] = useState<{ name: string; description: string }[]>([]);
   const [selectedRepo, setSelectedRepo] = useState('');
+  const [statusData, setStatusData] = useState<StatusResponse | null>(null);
+
   const selected = repos.find(r => r.name === selectedRepo);
+
+  useEffect(() => {
+    if (selectedRepo) {
+      fetchRepoStatus(selectedRepo).then(data => setStatusData(data));
+    }
+  }, [selectedRepo]);
 
   return (
     <Page themeId="tool">
@@ -66,11 +74,11 @@ export const TrafficComponent = () => {
               <Grid item xs={12} md={6}>
                 <InfoCard title="Security Checks">
                   <Typography variant="subtitle1">Dependabot</Typography>
-                  <TrafficLight color="green" />
+                  <TrafficLight color={statusData?.Dependabot || 'yellow'} />
                   <Typography variant="subtitle1">BlackDuck</Typography>
-                  <TrafficLight color="red" />
+                  <TrafficLight color={statusData?.BlackDuck || 'yellow'} />
                   <Typography variant="subtitle1">Fortify</Typography>
-                  <TrafficLight color="yellow" />
+                  <TrafficLight color={statusData?.Fortify || 'yellow'} />
                 </InfoCard>
               </Grid>
 
@@ -78,9 +86,9 @@ export const TrafficComponent = () => {
               <Grid item xs={12} md={6}>
                 <InfoCard title="Software Quality">
                   <Typography variant="subtitle1">SonarQube</Typography>
-                  <TrafficLight color="green" />
+                  <TrafficLight color={statusData?.SonarQube || 'yellow'} />
                   <Typography variant="subtitle1">CodeScene</Typography>
-                  <TrafficLight color="red" />
+                  <TrafficLight color={statusData?.CodeScene || 'yellow'} />
                 </InfoCard>
               </Grid>
 
@@ -90,7 +98,7 @@ export const TrafficComponent = () => {
                   <Typography variant="subtitle1">
                     Reporting Pipeline
                   </Typography>
-                  <TrafficLight color="green" />
+                  <TrafficLight color={statusData?.['Reporting Pipeline'] || 'yellow'} />
                 </InfoCard>
               </Grid>
 
@@ -100,7 +108,7 @@ export const TrafficComponent = () => {
                   <Typography variant="subtitle1">
                     Pre-Production pipelines
                   </Typography>
-                  <TrafficLight color="green" />
+                  <TrafficLight color={statusData?.['Pre-Production pipelines'] || 'yellow'} />
                 </InfoCard>
               </Grid>
 
@@ -110,7 +118,7 @@ export const TrafficComponent = () => {
                   <Typography variant="subtitle1">
                     Foundation Pipelines
                   </Typography>
-                  <TrafficLight color="green" />
+                  <TrafficLight color={statusData?.['Foundation Pipelines'] || 'yellow'} />
                 </InfoCard>
               </Grid>
             </Grid>
