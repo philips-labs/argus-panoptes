@@ -1,4 +1,4 @@
-import { ExampleComponent } from './ExampleComponent';
+import { ExampleComponent } from './TrafficComponent';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { screen } from '@testing-library/react';

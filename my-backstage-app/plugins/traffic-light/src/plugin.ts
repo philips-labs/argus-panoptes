@@ -16,7 +16,7 @@ export const TrafficLightPage = trafficLightPlugin.provide(
   createRoutableExtension({
     name: 'TrafficLightPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/TrafficComponent').then(m => m.TrafficComponent),
     mountPoint: rootRouteRef,
   }),
 );
