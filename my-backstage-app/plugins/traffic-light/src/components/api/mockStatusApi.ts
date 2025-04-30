@@ -14,7 +14,7 @@ export type StatusResponse = {
   };
   
   export const fetchRepoStatus = async (repoName: string): Promise<StatusResponse> => {
-    await new Promise(resolve => setTimeout(resolve, 300)); 
+    await new Promise(resolve => setTimeout(resolve, 300)); 4
   
     return {
       Dependabot: evaluateColor(generateMetricScore()),
