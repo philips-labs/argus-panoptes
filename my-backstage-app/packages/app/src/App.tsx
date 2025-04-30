@@ -36,6 +36,7 @@ import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
 import { TrafficLightPage } from '@internal/plugin-traffic-light';
+import { AiPluginPage } from '@internal/plugin-ai-plugin';
 
 
 const app = createApp({
@@ -97,6 +98,7 @@ const routes = (
     <Route path="/settings" element={<UserSettingsPage />} />
     <Route path="/catalog-graph" element={<CatalogGraphPage />} />
     <Route path="/traffic-light" element={<TrafficLightPage />} />
+    <Route path="/ai-plugin" element={<AiPluginPage />} />
   </FlatRoutes>
 );
 
