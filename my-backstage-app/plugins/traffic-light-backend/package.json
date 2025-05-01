@@ -1,0 +1,9 @@
+{
+    "name": "@internal/plugin-traffic-light-backend",
+    "version": "0.1.0",
+    "main": "src/index.ts",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2"
+    }
+}

@@ -6777,6 +6777,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@internal/plugin-traffic-light-backend@workspace:plugins/traffic-light-backend":
+  version: 0.0.0-use.local
+  resolution: "@internal/plugin-traffic-light-backend@workspace:plugins/traffic-light-backend"
+  dependencies:
+    express: "npm:^4.18.2"
+  languageName: unknown
+  linkType: soft
+
 "@internal/plugin-traffic-light@workspace:^, @internal/plugin-traffic-light@workspace:plugins/traffic-light":
   version: 0.0.0-use.local
   resolution: "@internal/plugin-traffic-light@workspace:plugins/traffic-light"
@@ -8721,13 +8729,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/openapi-types@npm:^24.2.0":
-  version: 24.2.0
-  resolution: "@octokit/openapi-types@npm:24.2.0"
-  checksum: 10c0/8f47918b35e9b7f6109be6f7c8fc3a64ad13a48233112b29e92559e64a564b810eb3ebf81b4cd0af1bb2989d27b9b95cca96e841ec4e23a3f68703cefe62fd9e
-  languageName: node
-  linkType: hard
-
 "@octokit/openapi-types@npm:^25.0.0":
   version: 25.0.0
   resolution: "@octokit/openapi-types@npm:25.0.0"
@@ -8984,16 +8985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/types@npm:^13.0.0, @octokit/types@npm:^13.1.0, @octokit/types@npm:^13.5.0":
-  version: 13.10.0
-  resolution: "@octokit/types@npm:13.10.0"
-  dependencies:
-    "@octokit/openapi-types": "npm:^24.2.0"
-  checksum: 10c0/f66a401b89d653ec28e5c1529abdb7965752db4d9d40fa54c80e900af4c6bf944af6bd0a83f5b4f1eecb72e3d646899dfb27ffcf272ac243552de7e3b97a038d
-  languageName: node
-  linkType: hard
-
-"@octokit/types@npm:^13.10.0":
+"@octokit/types@npm:^13.0.0, @octokit/types@npm:^13.1.0, @octokit/types@npm:^13.10.0, @octokit/types@npm:^13.5.0":
   version: 13.10.0
   resolution: "@octokit/types@npm:13.10.0"
   dependencies:

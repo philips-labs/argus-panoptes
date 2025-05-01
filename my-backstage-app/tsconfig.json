@@ -7,7 +7,7 @@
     "plugins/*/config.d.ts",
     "plugins/*/dev",
     "plugins/*/migrations"
-  ],
+, "plugins/traffic-light-backend/router.ts", "plugins/traffic-light-backend/index.ts" ,"plugins/traffic-light-backend"  ],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "outDir": "dist-types",

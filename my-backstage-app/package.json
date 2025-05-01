@@ -22,13 +22,11 @@
     "prettier:check": "prettier --check .",
     "new": "backstage-cli new"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*",
-      "plugins/*",
-      "my-backstage-app"
-    ]
-  },
+  "workspaces": [
+    "packages/*",
+    "plugins/*",
+    "my-backstage-app"
+  ],
   "devDependencies": {
     "@backstage/cli": "^0.32.0",
     "@backstage/e2e-test-utils": "^0.1.1",
