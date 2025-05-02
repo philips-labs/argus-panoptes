@@ -1,4 +1,4 @@
-import { getAzureDevOpsBugs } from '../utils.ts';
+import { getAzureDevOpsBugs, getGitHubRepoStatus } from '../utils.ts';
 
 export type TrafficLightColor = 'green' | 'yellow' | 'red';
 
@@ -25,26 +25,33 @@ export type StatusResponse = {
     }
   };
 
-  const mockResponse = {
-    workItems: [
-      { id: 101, fields: { "System.WorkItemType": "Bug" } },
-      { id: 102, fields: { "System.WorkItemType": "Bug" } },
-      { id: 103, fields: { "System.WorkItemType": "Task" } },
-    ]
+  // Ensure status returned by getGitHubRepoStatus is valid
+  const validateTrafficLightColor = (status: any): TrafficLightColor => {
+    if (status === 'green' || status === 'yellow' || status === 'red') {
+      return status;
+    }
+    return 'red'; // Default to 'red' if status is invalid
   };
 
   
   export const fetchRepoStatus = async (repoName: string): Promise<StatusResponse> => {
     await new Promise(resolve => setTimeout(resolve, 300)); 
+
+    const status = await getGitHubRepoStatus(repoName);
+
+    console.log("Received GitHub status!!!!!!!!!!!!!!!!:", status);
+
+    // Validate the status before using it
+    const preProdStatus: TrafficLightColor = validateTrafficLightColor(status);
   
     return {
-      Dependabot: evaluateColor(generateMetricScore()),
-      BlackDuck: evaluateColor(generateMetricScore()),
-      Fortify: { color: 'yellow', reason: 'Fixed yellow for Fortify' },
-      SonarQube: evaluateColor(generateMetricScore()),
-      CodeScene: evaluateColor(generateMetricScore()),
-      'Reporting Pipeline': evaluateColor(generateMetricScore()),
-      'Pre-Production pipelines': evaluateColor(generateMetricScore()),
+      Dependabot: { color: 'green', reason: `Score 70 ≥ 70 (green)` },
+      BlackDuck: { color: 'green', reason: `Score 70 ≥ 70 (green)` },
+      Fortify: { color: 'green', reason: 'Fixed yellow for Fortify' },
+      SonarQube: { color: 'green', reason: `Score 70 ≥ 70 (green)` },
+      CodeScene: { color: 'green', reason: `Score 70 ≥ 70 (green)` },
+      'Reporting Pipeline': { color: 'green', reason: `Score 70 ≥ 70 (green)` },
+      'Pre-Production pipelines': { color: preProdStatus, reason: `Score 70 ≥ 70 (green)` },
       'Foundation Pipelines': evaluateColorDevOps(await getAzureDevOpsBugs()),
     };
   };
