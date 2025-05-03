@@ -6,7 +6,10 @@ metadata:
   annotations:
     github.com/project-slug: philips-labs/terraform-provider-unleash
     backstage.io/source-location: url:https://github.com/philips-labs/terraform-provider-unleash
+  tags:
+    - non-critical
 spec:
   type: service
   lifecycle: experimental
   owner: philips-labs
+  system: user-management-system

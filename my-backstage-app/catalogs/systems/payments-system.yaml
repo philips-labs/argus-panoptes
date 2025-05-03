@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: payments-system
+  title: Payments System
+  description: Handles all payment transactions and billing
+spec:
+  owner: finance-team

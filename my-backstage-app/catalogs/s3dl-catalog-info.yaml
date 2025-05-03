@@ -2,11 +2,14 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: s3dl
-  description: Generates pre-signed S3 Download URLS for any key in the attached S3 bucket. 
+  description: Generates pre-signed S3 Download URLS for any key in the attached S3 bucket.
   annotations:
     github.com/project-slug: philips-labs/s3dl
     backstage.io/source-location: url:https://github.com/philips-labs/s3dl
+  tags:
+    - critical
 spec:
   type: service
   lifecycle: experimental
   owner: philips-labs
+  system: payments-system

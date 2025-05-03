@@ -76,9 +76,25 @@ catalog:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow: [Component, System, API, Resource, Location, Group]
   locations:
     # File locations are relative to the backend process, typically `packages/backend`
+    #Groups
+    - type: file
+      target: ../../catalogs/groups/philips-labs.yaml
+
+    - type: file
+      target: ../../catalogs/groups/finance-team.yaml
+
+    - type: file
+      target: ../../catalogs/groups/identity-team.yaml
+
+    # Systems
+    - type: file
+      target: ../../catalogs/systems/payments-system.yaml
+
+    - type: file
+      target: ../../catalogs/systems/user-management-system.yaml
 
     # Philips Labs repos
     - type: file

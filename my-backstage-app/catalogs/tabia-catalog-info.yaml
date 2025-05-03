@@ -6,7 +6,10 @@ metadata:
   annotations:
     github.com/project-slug: philips-labs/tabia
     backstage.io/source-location: url:https://github.com/philips-labs/tabia
+  tags:
+    - non-critical
 spec:
   type: service
   lifecycle: experimental
   owner: philips-labs
+  system: user-management-system

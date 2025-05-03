@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: user-management-system
+  title: User Management System
+  description: Manages user accounts, profiles, and authentication
+spec:
+  owner: identity-team

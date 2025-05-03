@@ -2,11 +2,14 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: workflow-capability
-  description: Allows caregivers and hospital management to start, control, and view the status of medical protocol workflows of patients. 
+  description: Allows caregivers and hospital management to start, control, and view the status of medical protocol workflows of patients.
   annotations:
     github.com/project-slug: philips-labs/workflow-capability
     backstage.io/source-location: url:https://github.com/philips-labs/workflow-capability
+  tags:
+    - non-critical
 spec:
   type: service
   lifecycle: experimental
   owner: philips-labs
+  system: user-management-system
