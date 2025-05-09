@@ -139,7 +139,7 @@ jobs:
 
       - name: SonarQube Scan
         if: hashFiles(format('workspaces/{0}/sonar-project.properties', matrix.workspace)) != ''
-        uses: SonarSource/sonarqube-scan-action@aa494459d7c39c106cc77b166de8b4250a32bb97 # v5.1.0
+        uses: SonarSource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v5.2.0
         with:
           projectBaseDir: ./workspaces/${{ matrix.workspace }}
         env:
