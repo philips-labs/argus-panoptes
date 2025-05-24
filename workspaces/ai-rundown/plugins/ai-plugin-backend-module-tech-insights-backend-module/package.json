@@ -1,0 +1,43 @@
+{
+  "name": "@internal/plugin-ai-plugin-backend-module-tech-insights-backend-module",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "description": "The tech-insights-backend-module backend module for the ai-plugin plugin.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philips-labs/argus-panotes",
+    "directory": "workspaces/ai-rundown/plugins/ai-plugin-backend-module-tech-insights-backend-module"
+  },
+  "backstage": {
+    "role": "backend-plugin-module",
+    "pluginId": "ai-plugin",
+    "pluginPackage": "@internal/plugin-ai-plugin-backend"
+  },
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test",
+    "clean": "backstage-cli package clean",
+    "prepack": "backstage-cli package prepack",
+    "postpack": "backstage-cli package postpack"
+  },
+  "dependencies": {
+    "@backstage/backend-plugin-api": "^1.3.0"
+  },
+  "devDependencies": {
+    "@backstage/backend-test-utils": "^1.3.0",
+    "@backstage/cli": "^0.32.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

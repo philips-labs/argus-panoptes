@@ -21,21 +21,17 @@ spec:
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-api
 apiVersion: backstage.io/v1alpha1
-kind: API
+kind: Component
 metadata:
-  name: example-grpc-api
+  name: trivy
+  description: This is another test repo.
+  annotations:
+    github.com/project-slug: aquasecurity/trivy
+    backstage.io/source-location: url:https://github.com/aquasecurity/trivy
+  tags:
+    - critical
 spec:
-  type: grpc
+  type: service
   lifecycle: experimental
-  owner: guests
-  system: examples
-  definition: |
-    syntax = "proto3";
-
-    service Exampler {
-      rpc Example (ExampleMessage) returns (ExampleMessage) {};
-    }
-
-    message ExampleMessage {
-      string example = 1;
-    };
+  owner: aquasecurity
+  system: new-system

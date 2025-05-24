@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "bundled": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philips-labs/argus-panotes",
+    "directory": "workspaces/ai-rundown/packages/app"
+  },
   "backstage": {
     "role": "frontend"
   },
@@ -39,8 +44,10 @@
     "@backstage/plugin-techdocs-react": "^1.2.16",
     "@backstage/plugin-user-settings": "^0.8.21",
     "@backstage/theme": "^0.6.5",
+    "@internal/plugin-ai-plugin": "workspace:^",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.9.1",
+    "openai": "^4.97.0",
     "react": "^18.0.2",
     "react-dom": "^18.0.2",
     "react-router": "^6.3.0",
