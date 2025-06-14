@@ -3,21 +3,91 @@
 apiVersion: backstage.io/v1alpha1
 kind: System
 metadata:
-  name: examples
+  name: user-management-system
+  title: User Management System
+  annotations:
+    tech-insights.io/dependabot-critical-alert-threshold: '2'
+    tech-insights.io/dependabot-high-alert-threshold: '2'
+    tech-insights.io/dependabot-medium-alert-threshold: '2'
+    tech-insights.io/dependabot-operator: 'lessThanInclusive'
+    tech-insights.io/sonarcloud-quality-gate-red-threshold-percentage: '50'
+    tech-insights.io/sonarcloud-quality-gate-yellow-threshold-percentage: '25'
+    tech-insights.io/foundation-success-rate-threshold: '90'
+    tech-insights.io/foundation-success-rate-operator: 'greaterThanInclusive'
+    tech-insights.io/foundation-max-failures-threshold: '2'
+    tech-insights.io/foundation-max-failures-operator: 'lessThanInclusive'
+    tech-insights.io/preproduction-success-rate-threshold: '70'
+    tech-insights.io/preproduction-success-rate-operator: 'greaterThanInclusive'
+    tech-insights.io/preproduction-max-failures-threshold: '35'
+    tech-insights.io/preproduction-max-failures-operator: 'lessThanInclusive'
+    tech-insights.io/reporting-success-rate-threshold: '80'
+    tech-insights.io/reporting-success-rate-operator: 'greaterThanInclusive'
+    preproduction-configured-repositories: 'fatt,terraform-registry,argus-panoptes'
+    foundation-configured-repositories: 'fatt,terraform-registry,argus-panoptes,tabia'
+
+    # Github Advanced Security - fact checker thresholds
+    tech-insights.io/github-advanced-security-secrets-threshold: '0'
+    tech-insights.io/github-advanced-security-secrets-operator: 'graterThan'
+
+    tech-insights.io/github-advanced-security-critical-count-threshold: '0'
+    tech-insights.io/github-advanced-security-critical-count-operator: 'greaterThan'
+
+    tech-insights.io/github-advanced-security-high-count-threshold: '0'
+    tech-insights.io/github-advanced-security-high-count-operator: 'greaterThan'
+
+    tech-insights.io/github-advanced-security-medium-count-threshold: '2'
+    tech-insights.io/github-advanced-security-medium-count-operator: 'greaterThan'
+
+    tech-insights.io/github-advanced-security-low-count-threshold: '10'
+    tech-insights.io/github-advanced-security-low-count-operator: 'greaterThan'
+
+    # Github advanced security - thresholds for system
+    github-advanced-security-system-critical-threshold-red: '0'
+    github-advanced-security-system-secrets-threshold-red: '0'
+    github-advanced-security-system-high-threshold-red: '0'
+    github-advanced-security-system-medium-threshold-red: '0.8'
+    github-advanced-security-system-medium-threshold-yellow: '0.4'
+    github-advanced-security-system-low-threshold-yellow: '0.7'
+
+    foundation-check-threshold-red: '0.6'
+    preproduction-check-threshold-red: '1'
+    reporting-check-threshold-red: '2'
+    azure-bugs-check-threshold-red: '0.4'
+
+    # Azure DevOps Annotations
+    tech-insights.io/azure-bugs-threshold: '0'
+    tech-insights.io/azure-bugs-operator: 'lessThanInclusive'
 spec:
-  owner: guests
+  owner: identity-team
+
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: example-website
+  name: terraform-registry
+  description: Light weight Terraform Registry.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/terraform-registry
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/terraform-registry
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_terraform-registry
+    sonarcloud.io/enabled: 'true'
+    pipeline/thresholds: '{"maxFailures": 2, "minSuccessRate": 95}'
+    foundation/thresholds: '{"minSuccessRate": 95}'
+    reporting/workflows: '["CodeQL", "Continuous Integration"]'
+    reporting/target-branch: main
+    preproduction/exclude: '["Dependabot.*"]'
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_3
+    azure.com/bugs-query-id: 80418d71-f25d-4316-9bca-427795de35e8
+  tags:
+    - critical
 spec:
-  type: website
+  type: service
   lifecycle: experimental
-  owner: guests
-  system: examples
-  providesApis: [example-grpc-api]
+  owner: SEP-ArgusPanoptes
+  system: user-management-system
+
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-api
 apiVersion: backstage.io/v1alpha1
