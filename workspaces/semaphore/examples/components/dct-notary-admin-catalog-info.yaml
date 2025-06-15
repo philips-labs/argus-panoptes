@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dct-notary-admin
+  description: Adds the capability to manage your Docker Content Trust and notary certificates.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/dct-notary-admin
+    backstage.io/source-location: url:https://github.com/philips-labs/dct-notary-admin
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_dct-notary-admin
+    sonarcloud.io/enabled: 'true'
+    # 'blackduck.io/enabled': 'true'
+    # 'blackduck.io/project-name': 'dct-notary-admin'
+    # 'blackduck.io/project-version': '1.0.0'
+    reporting/workflows: '["CodeQL", "Continuous Integration"]'
+    reporting/target-branch: main
+    preproduction/exclude: '["Dependabot.*"]'
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_2
+    azure.com/bugs-query-id: b2fdb928-a73e-4cba-82c9-e605a194666d
+  tags:
+    - critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: payments-system

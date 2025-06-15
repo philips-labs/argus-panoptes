@@ -22,5 +22,9 @@
   "devDependencies": {
     "fs-extra": "11.3.0",
     "node-fetch": "^3.3.2"
+  },
+  "resolutions": {
+    "@backstage/plugin-scaffolder-backend/@backstage/plugin-scaffolder-backend-module-github": "0.7.0",
+    "@backstage/plugin-scaffolder-backend-module-github": "0.7.0"
   }
 }

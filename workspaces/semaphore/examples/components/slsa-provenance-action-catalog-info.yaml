@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: slsa-provenance-action
+  description: Implements the level 1 requirements of the SLSA framework.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/slsa-provenance-action
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/slsa-provenance-action
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_slsa-provenance-action
+    sonarcloud.io/enabled: 'true'
+    reporting/workflows: '["CodeQL", "Continuous integration"]'
+    reporting/target-branch: main
+    preproduction/exclude: '["Dependabot.*"]'
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_2
+    azure.com/bugs-query-id: b2fdb928-a73e-4cba-82c9-e605a194666d
+  tags:
+    - critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: payments-system

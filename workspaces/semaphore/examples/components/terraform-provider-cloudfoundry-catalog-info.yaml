@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-cloudfoundry
+  description: Allows you to configure a Cloud Foundry environment declaratively using HCL.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/terraform-provider-cloudfoundry
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/terraform-provider-cloudfoundry
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_terraform-provider-cloudfoundry
+    sonarcloud.io/enabled: 'true'
+    reporting/workflows: '["CodeQL"]'
+    reporting/target-branch: main
+    preproduction/exclude: '["Dependabot.*"]'
+  tags:
+    - non-critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: user-management-system

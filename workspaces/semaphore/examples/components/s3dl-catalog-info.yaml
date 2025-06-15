@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: s3dl
+  description: Generates pre-signed S3 Download URLS for any key in the attached S3 bucket.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/s3dl
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/s3dl
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_s3dl
+    sonarcloud.io/enabled: 'true'
+    reporting/workflows: '["CodeQL"]'
+    reporting/target-branch: main
+    preproduction/exclude: '["Dependabot.*"]'
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_1
+    azure.com/bugs-query-id: 38d4d504-f147-45ce-9658-c27a9d3b9908
+  tags:
+    - critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: user-management-system

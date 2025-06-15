@@ -1,4 +1,4 @@
-import { Button, Grid } from '@material-ui/core';
+import { Grid, Button } from '@material-ui/core';
 import {
   EntityApiDefinitionCard,
   EntityConsumedApisCard,

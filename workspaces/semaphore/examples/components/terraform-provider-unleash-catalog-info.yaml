@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-unleash
+  description: A Terraform provider to provision and manage Unleash admin resources.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/terraform-provider-unleash
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/terraform-provider-unleash
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_terraform-provider-unleash
+    sonarcloud.io/enabled: 'true'
+    reporting/workflows: '["CodeQL"]'
+    reporting/target-branch: dependabot/go_modules/github.com/hashicorp/terraform-plugin-docs-0.21.0
+    preproduction/exclude: '["Dependabot.*"]'
+  tags:
+    - non-critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: user-management-system
