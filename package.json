@@ -16,7 +16,7 @@
     "@backstage/catalog-model": "^1.7.4",
     "@backstage/cli-node": "^0.2.13",
     "@changesets/parse": "^0.4.1",
-    "@mui/material": "^7.1.0",
+    "@mui/material": "^7.1.1",
     "@octokit/rest": "^21.1.1"
   },
   "devDependencies": {
