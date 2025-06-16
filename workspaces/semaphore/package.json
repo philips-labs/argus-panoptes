@@ -74,6 +74,6 @@
     "@octokit/rest": "20.0.0",
     "@octokit/types": "12.6.0",
     "dotenv": "^16.5.0",
-    "octokit": "3.0.0"
+    "octokit": "3.1.2"
   }
 }
