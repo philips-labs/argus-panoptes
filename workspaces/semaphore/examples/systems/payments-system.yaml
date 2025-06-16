@@ -1,0 +1,60 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: payments-system
+  title: Payments System
+  annotations:
+    tech-insights.io/dependabot-critical-alert-threshold: '5'
+    tech-insights.io/dependabot-high-alert-threshold: '25'
+    tech-insights.io/dependabot-medium-alert-threshold: '15'
+    tech-insights.io/dependabot-operator: 'lessThanInclusive'
+    tech-insights.io/sonarcloud-quality-gate-red-threshold-percentage: '30'
+    tech-insights.io/sonarcloud-quality-gate-yellow-threshold-percentage: '20'
+    tech-insights.io/foundation-success-rate-threshold: '65'
+    tech-insights.io/foundation-success-rate-operator: 'greaterThanInclusive'
+    tech-insights.io/foundation-max-failures-threshold: '2'
+    tech-insights.io/foundation-max-failures-operator: 'lessThanInclusive'
+    tech-insights.io/preproduction-success-rate-threshold: '95'
+    tech-insights.io/preproduction-success-rate-operator: 'greaterThanInclusive'
+    tech-insights.io/preproduction-max-failures-threshold: '35'
+    tech-insights.io/preproduction-max-failures-operator: 'lessThanInclusive'
+    preproduction-configured-repositories: 'fatt,dct-notary-admin,slsa-provenance-action'
+    foundation-configured-repositories: 'fatt,terraform-registry,argus-panoptes,tabia'
+
+    # Github Advanced Security - fact checker thresholds
+    tech-insights.io/github-advanced-security-secrets-threshold: '0'
+    tech-insights.io/github-advanced-security-secrets-operator: 'graterThan'
+
+    tech-insights.io/github-advanced-security-critical-count-threshold: '0'
+    tech-insights.io/github-advanced-security-critical-count-operator: 'greaterThan'
+
+    tech-insights.io/github-advanced-security-high-count-threshold: '0'
+    tech-insights.io/github-advanced-security-high-count-operator: 'greaterThan'
+
+    tech-insights.io/github-advanced-security-medium-count-threshold: '2'
+    tech-insights.io/github-advanced-security-medium-count-operator: 'greaterThan'
+
+    tech-insights.io/github-advanced-security-low-count-threshold: '10'
+    tech-insights.io/github-advanced-security-low-count-operator: 'greaterThan'
+
+    # Github advanced security - thresholds for system
+    github-advanced-security-system-critical-threshold-red: '0'
+    github-advanced-security-system-secrets-threshold-red: '0'
+    github-advanced-security-system-high-threshold-red: '0'
+    github-advanced-security-system-medium-threshold-red: '0.8'
+    github-advanced-security-system-medium-threshold-yellow: '0.4'
+    github-advanced-security-system-low-threshold-yellow: '0.7'
+
+    foundation-check-threshold-red: '0.4'
+    preproduction-check-threshold-red: '0.4'
+    reporting-check-threshold-red: '0.3'
+    azure-bugs-check-threshold-red: '0.33'
+
+    tech-insights.io/azure-bugs-threshold: '1'
+    tech-insights.io/azure-bugs-operator: 'lessThanInclusive'
+
+    tech-insights.io/reporting-success-rate-threshold: '80'
+    tech-insights.io/reporting-success-rate-operator: 'greaterThanInclusive'
+spec:
+  owner: finance-team
+  members: [vpetkova]

@@ -16,6 +16,10 @@ backend.add(import('@backstage/plugin-scaffolder-backend'));
 backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
 backend.add(import('@backstage/plugin-techdocs-backend'));
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 // auth plugin
 backend.add(import('@backstage/plugin-auth-backend'));
 // See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
@@ -51,5 +55,17 @@ backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 
 // kubernetes
 backend.add(import('@backstage/plugin-kubernetes-backend'));
+
+// tech insights
+backend.add(import('@backstage-community/plugin-tech-insights-backend'));
+backend.add(
+  import('@backstage-community/plugin-tech-insights-backend-module-jsonfc'),
+);
+
+backend.add(
+  import(
+    '@internal/plugin-tech-insights-backend-module-traffic-light-backend-module'
+  ),
+);
 
 backend.start();

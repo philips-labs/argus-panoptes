@@ -30,18 +30,24 @@ backend:
   database:
     client: better-sqlite3
     connection: ':memory:'
+    # client: pg
+    # connection:
+    #   host: ${POSTGRES_HOST}
+    #   port: ${POSTGRES_PORT}
+    #   user: ${POSTGRES_USER}
+    #   password: ${POSTGRES_PASSWORD}
+    #   database: '${POSTGRES_DATABASE}'
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 integrations:
   github:
     - host: github.com
-      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
-      # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
       token: ${GITHUB_TOKEN}
-    ### Example for how to add your GitHub Enterprise instance using the API:
-    # - host: ghe.example.net
-    #   apiBaseUrl: https://ghe.example.net/api/v3
-    #   token: ${GHE_TOKEN}
+  azure:
+    - host: dev.azure.com
+      token: ${AZURE_DEVOPS_TOKEN}
+  gemini:
+    - token: ${GEMINI_TOKEN}
 
 proxy:
   ### Example for how to add a proxy endpoint for the frontend.
@@ -78,21 +84,13 @@ catalog:
   rules:
     - allow: [Component, System, API, Resource, Location]
   locations:
-    # Local example data, file locations are relative to the backend process, typically `packages/backend`
+    # Systems
     - type: file
-      target: ../../examples/entities.yaml
+      target: ../../examples/systems/*.yaml
 
-    # Local example template
+    # Components
     - type: file
-      target: ../../examples/template/template.yaml
-      rules:
-        - allow: [Template]
-
-    # Local example organizational data
-    - type: file
-      target: ../../examples/org.yaml
-      rules:
-        - allow: [User, Group]
+      target: ../../examples/*components/*.yaml
 
     ## Uncomment these lines to add more example data
     # - type: url
@@ -114,3 +112,197 @@ kubernetes:
 permission:
   # setting this to `false` will disable permissions
   enabled: true
+
+sonarcloud:
+  token: ${SONARCLOUD_TOKEN}
+  organization: sep-arguspanoptes
+
+blackduck:
+  token: ${BLACKDUCK_TOKEN}
+  host: ${BLACKDUCK_BASE_URL}
+
+techInsights:
+  factRetrievers:
+    sonarcloud-fact-retriever: # Change from array to object
+      enabled: true
+      cadence: '1 * * * *' # Every 4 hours
+    azure-devops-bugs-retriever:
+      enabled: true
+      cadence: '* * * * *' # Every 4 hours
+      filter:
+        kind: Component
+    dependabotFactRetriever:
+      cadence: '* * * * *' # every minute
+      lifecycle: { timeToLive: { weeks: 2 } }
+    githubPipelineStatusFactRetriever:
+      cadence: '0 0 * * *' # every day at 00:00 (midnight)
+      lifecycle: { timeToLive: { weeks: 2 } }
+    foundationPipelineStatusFactRetriever:
+      cadence: '0 0 * * *' # every day at 00:00 (midnight)
+      lifecycle: { timeToLive: { weeks: 2 } }
+    reportingPipelineStatusFactRetriever:
+      cadence: '*/2 * * * *' # every minute
+      lifecycle: { timeToLive: { weeks: 2 } }
+    blackduck-fact-retriever:
+      enabled: true
+      cadence: '0 */4 * * *' # Every 4 hours
+    githubAdvancedSecurityFactRetriever:
+      cadence: '0 * * * *' # every hour
+  factChecker:
+    checks:
+      noHighBugsCheck:
+        type: json-rules-engine
+        name: No High Bugs Check
+        description: Verifies that there are no high severity bugs
+        factIds:
+          - sonarcloud-fact-retriever
+        rule:
+          conditions:
+            all:
+              - fact: bugs
+                operator: lessThanInclusive
+                value: 0
+      noHighCodeSmellsCheck:
+        type: json-rules-engine
+        name: Code Smells Check
+        description: Verifies code smells are within acceptable range
+        factIds:
+          - sonarcloud-fact-retriever
+        rule:
+          conditions:
+            all:
+              - fact: code_smells
+                operator: lessThanInclusive
+                value: 20
+      vulnerabilitiesCheck:
+        type: json-rules-engine
+        name: Vulnerabilities Check
+        description: Verifies vulnerabilities are within acceptable range
+        factIds:
+          - sonarcloud-fact-retriever
+        rule:
+          conditions:
+            all:
+              - fact: vulnerabilities
+                operator: lessThanInclusive
+                value: 5
+      qualityGateCheck:
+        type: json-rules-engine
+        name: Quality Gate Check
+        description: Verifies quality gate status is passed
+        factIds:
+          - sonarcloud-fact-retriever
+        rule:
+          conditions:
+            all:
+              - fact: quality_gate
+                operator: equal
+                value: 'OK'
+      codeCoverageCheck:
+        type: json-rules-engine
+        name: Code Coverage Check
+        description: Verifies code coverage is within acceptable range
+        factIds:
+          - sonarcloud-fact-retriever
+        rule:
+          conditions:
+            all:
+              - fact: code_coverage
+                operator: greaterThanInclusive
+                value: 35
+      commitMessageCheck:
+        type: json-rules-engine
+        name: Commit Message Check
+        description: Ensures there is a recent commit message
+        factIds:
+          - github-commit-message-retriever
+        rule:
+          conditions:
+            all:
+              - fact: last_commit_message
+                operator: notEqual
+                value: ''
+      commitCountCheck:
+        type: json-rules-engine
+        name: Recent Commits Check
+        description: Checks if there are recent commits in the past week
+        factIds:
+          - github-commit-message-retriever
+        rule:
+          conditions:
+            all:
+              - fact: commit_count_last_week
+                operator: greaterThan
+                value: 0
+      dependabotLowAlertCheck:
+        type: json-rules-engine
+        name: Dependabot Alerts Below Threshold
+        description: Checks if Dependabot alerts are below 5
+        factIds:
+          - dependabotFactRetriever
+        rule:
+          conditions:
+            all:
+              - fact: openAlertCount
+                operator: lessThan
+                value: 5
+      githubCodeScanningCheck:
+        type: json-rules-engine
+        name: Code Scanning Alerts Below Threshold
+        description: Checks if Code Scanning alerts are below acceptable threshold
+        factIds:
+          - githubAdvancedSecurityFactRetriever
+        rule:
+          conditions:
+            all:
+              - fact: openCodeScanningAlertCount
+                operator: lessThan
+                value: 5
+      githubSecretScanningCheck:
+        type: json-rules-engine
+        name: No Secret Scanning Alerts
+        description: Checks if there are no exposed secrets detected
+        factIds:
+          - githubAdvancedSecurityFactRetriever
+        rule:
+          conditions:
+            all:
+              - fact: openSecretScanningAlertCount
+                operator: lessThanInclusive
+                value: 0
+      githubCodeScanningAlert:
+        type: json-rules-engine
+        name: Code Scanning Alerts as dictionary
+        description: Checks if Code Scanning alerts are below acceptable threshold
+        factIds:
+          - githubAdvancedSecurityFactRetriever
+        rule:
+          conditions:
+            all:
+              - fact: codeScanningAlerts
+                operator: equal
+                value: {}
+      githubSecretScanningAlert:
+        type: json-rules-engine
+        name: No Secret Scanning Alerts
+        description: Checks if there are no exposed secrets detected
+        factIds:
+          - githubAdvancedSecurityFactRetriever
+        rule:
+          conditions:
+            all:
+              - fact: secretScanningAlerts
+                operator: equal
+                value: {}
+      preProductionFactCheck:
+        type: json-rules-engine
+        name: Pre Production Pipeline
+        description: Checks the number of pipelines that fail
+        factIds:
+          - githubPipelineStatusFactRetriever
+        rule:
+          conditions:
+            all:
+              - fact: successWorkflowRunsCount
+                operator: moreThan
+                value: 80

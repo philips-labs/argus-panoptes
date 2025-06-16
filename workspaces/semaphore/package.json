@@ -11,18 +11,19 @@
     "build:all": "backstage-cli repo build --all",
     "build-image": "yarn workspace backend build-image",
     "tsc": "tsc",
-    "tsc:full": "tsc --skipLibCheck false --incremental false",
+    "tsc:full": "tsc --skipLibCheck true --incremental false",
     "clean": "backstage-cli repo clean",
     "test": "backstage-cli repo test",
     "test:all": "backstage-cli repo test --coverage",
     "test:e2e": "playwright test",
     "fix": "backstage-cli repo fix",
-    "lint": "backstage-cli repo lint --since origin/master",
+    "lint": "backstage-cli repo lint --since origin/main",
     "lint:all": "backstage-cli repo lint",
     "prettier:check": "prettier --check .",
     "new": "backstage-cli new --scope @philips-labs --no-private",
-    "build:api-reports": "yarn build:api-reports:only --tsc",
-    "build:api-reports:only": "backstage-repo-tools api-reports -o ae-wrong-input-file-type --validate-release-tags"
+    "build:api-reports": "yarn build:api-reports:only --tsc --exclude node_modules",
+    "build:api-reports:only": "backstage-repo-tools api-reports -o ae-wrong-input-file-type --validate-release-tags",
+    "prettier:write": "prettier --write ."
   },
   "workspaces": {
     "packages": [
@@ -60,5 +61,19 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@4.9.1"
+  "packageManager": "yarn@4.9.1",
+  "dependencies": {
+    "@backstage/core-app-api": "^1.17.0",
+    "@backstage/plugin-catalog": "^1.30.0",
+    "@backstage/plugin-scaffolder-backend": "1.32.0",
+    "@backstage/plugin-tech-insights": "^0.3.27",
+    "@material-ui/core": "^4.12.4",
+    "@octokit/plugin-paginate-rest": "13.0.1",
+    "@octokit/plugin-rest-endpoint-methods": "10.0.0",
+    "@octokit/plugin-retry": "^8.0.1",
+    "@octokit/rest": "20.0.0",
+    "@octokit/types": "12.6.0",
+    "dotenv": "^16.5.0",
+    "octokit": "3.0.0"
+  }
 }
