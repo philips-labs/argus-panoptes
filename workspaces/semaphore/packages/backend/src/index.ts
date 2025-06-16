@@ -64,7 +64,7 @@ backend.add(
 
 backend.add(
   import(
-    '@internal/plugin-tech-insights-backend-module-traffic-light-backend-module'
+    '@philips-labs/plugin-tech-insights-backend-module-traffic-light-backend-module'
   ),
 );
 

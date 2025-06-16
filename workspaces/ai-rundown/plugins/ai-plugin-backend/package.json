@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-ai-plugin-backend",
+  "name": "@philips-labs/plugin-ai-plugin-backend",
   "version": "0.1.0",
   "license": "MIT",
   "main": "src/index.ts",
@@ -18,8 +18,8 @@
     "role": "backend-plugin",
     "pluginId": "ai-plugin",
     "pluginPackages": [
-      "@internal/plugin-ai-plugin",
-      "@internal/plugin-ai-plugin-backend"
+      "@philips-labs/plugin-ai-plugin",
+      "@philips-labs/plugin-ai-plugin-backend"
     ]
   },
   "scripts": {

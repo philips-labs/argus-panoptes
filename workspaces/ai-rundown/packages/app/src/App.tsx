@@ -35,7 +35,7 @@ import { AppRouter, FlatRoutes } from '@backstage/core-app-api';
 import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
-import { AiPluginPage } from '@internal/plugin-ai-plugin';
+import { AiPluginPage } from '@philips-labs/plugin-ai-plugin';
 
 const app = createApp({
   apis,

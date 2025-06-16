@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-tech-insights-backend-module-traffic-light-backend-module",
+  "name": "@philips-labs/plugin-tech-insights-backend-module-traffic-light-backend-module",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -18,7 +18,7 @@
   },
   "backstage": {
     "role": "backend-plugin-module",
-    "pluginPackage": "@internal/plugin-tech-insights-backend",
+    "pluginPackage": "@philips-labs/plugin-tech-insights-backend",
     "pluginId": "tech-insights"
   },
   "scripts": {

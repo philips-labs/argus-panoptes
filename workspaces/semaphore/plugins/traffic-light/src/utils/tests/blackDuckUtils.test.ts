@@ -8,7 +8,7 @@ import { CompoundEntityRef, Entity } from '@backstage/catalog-model';
 import {
   DynamicThresholdResult,
   DynamicThresholdCheck,
-} from '@internal/plugin-tech-insights-backend-module-traffic-light-backend-module';
+} from '@philips-labs/plugin-tech-insights-backend-module-traffic-light-backend-module';
 
 // Mock the TechInsightsApi
 const mockTechInsightsApi = {

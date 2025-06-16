@@ -61,9 +61,9 @@ backend.add(import('@backstage/plugin-kubernetes-backend'));
 // ai-plugin
 backend.add(
   import(
-    '@internal/plugin-ai-plugin-backend-module-tech-insights-backend-module'
+    '@philips-labs/plugin-ai-plugin-backend-module-tech-insights-backend-module'
   ),
 );
-backend.add(import('@internal/plugin-ai-plugin-backend'));
+backend.add(import('@philips-labs/plugin-ai-plugin-backend'));
 
 backend.start();

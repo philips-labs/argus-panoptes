@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-ai-plugin-backend-module-tech-insights-backend-module",
+  "name": "@philips-labs/plugin-ai-plugin-backend-module-tech-insights-backend-module",
   "version": "0.1.0",
   "license": "MIT",
   "description": "The tech-insights-backend-module backend module for the ai-plugin plugin.",
@@ -18,7 +18,7 @@
   "backstage": {
     "role": "backend-plugin-module",
     "pluginId": "ai-plugin",
-    "pluginPackage": "@internal/plugin-ai-plugin-backend"
+    "pluginPackage": "@philips-labs/plugin-ai-plugin-backend"
   },
   "scripts": {
     "start": "backstage-cli package start",

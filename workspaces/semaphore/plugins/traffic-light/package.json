@@ -1,5 +1,5 @@
 {
-  "name": "@internal/plugin-traffic-light",
+  "name": "@philips-labs/plugin-traffic-light",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -19,7 +19,7 @@
     "role": "frontend-plugin",
     "pluginId": "traffic-light",
     "pluginPackages": [
-      "@internal/plugin-traffic-light"
+      "@philips-labs/plugin-traffic-light"
     ]
   },
   "sideEffects": false,
@@ -53,7 +53,7 @@
     "@backstage/core-app-api": "^1.16.1",
     "@backstage/dev-utils": "^1.1.9",
     "@backstage/test-utils": "^1.7.7",
-    "@internal/plugin-tech-insights-backend-module-traffic-light-backend-module": "workspace:^",
+    "@philips-labs/plugin-tech-insights-backend-module-traffic-light-backend-module": "workspace:^",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",
