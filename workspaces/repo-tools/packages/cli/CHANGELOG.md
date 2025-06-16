@@ -1,4 +1,4 @@
-# @philips-labs/argus-panotes-cli
+# @philips-labs/argus-panoptes-cli
 
 ## 0.3.0
 

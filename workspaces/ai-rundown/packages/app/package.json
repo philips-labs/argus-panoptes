@@ -5,7 +5,7 @@
   "bundled": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/philips-labs/argus-panotes",
+    "url": "https://github.com/philips-labs/argus-panoptes",
     "directory": "workspaces/ai-rundown/packages/app"
   },
   "backstage": {

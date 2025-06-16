@@ -4856,9 +4856,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@philips-labs/argus-panotes-cli@workspace:packages/cli":
+"@philips-labs/argus-panoptes-cli@workspace:packages/cli":
   version: 0.0.0-use.local
-  resolution: "@philips-labs/argus-panotes-cli@workspace:packages/cli"
+  resolution: "@philips-labs/argus-panoptes-cli@workspace:packages/cli"
   dependencies:
     "@backstage/cli": "npm:^0.26.2"
     "@backstage/errors": "npm:^1.2.4"

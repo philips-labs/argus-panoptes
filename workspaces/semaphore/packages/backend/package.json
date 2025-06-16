@@ -6,7 +6,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/philips-labs/argus-panotes",
+    "url": "https://github.com/philips-labs/argus-panoptes",
     "directory": "workspaces/semaphore/packages/backend"
   },
   "backstage": {

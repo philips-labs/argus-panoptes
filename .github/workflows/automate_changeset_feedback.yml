@@ -21,7 +21,7 @@ jobs:
     name:
       Generate Changeset Feedback
       # prevent running towards forks and version packages
-    if: github.repository == 'philips-labs/argus-panotes' && github.event.pull_request.user.login != 'github-actions[bot]'
+    if: github.repository == 'philips-labs/argus-panoptes' && github.event.pull_request.user.login != 'github-actions[bot]'
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

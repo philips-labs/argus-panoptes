@@ -202,13 +202,13 @@ const deprecatePackage = async (options: { package: Package }) => {
   // first update the readme
   await fs.writeFile(
     path.join(options.package.dir, 'README.md'),
-    `# Deprecated\n\nThis package has been moved to the [backstage-community/plugins](https://github.com/philips-labs/argus-panotes) repository. Migrate to using \`${newPackageName}\` instead.\n`,
+    `# Deprecated\n\nThis package has been moved to the [backstage-community/plugins](https://github.com/philips-labs/argus-panoptes) repository. Migrate to using \`${newPackageName}\` instead.\n`,
   );
 
   // then update package.json
   const packageJsonPath = path.join(options.package.dir, 'package.json');
   const packageJson = await fs.readJson(packageJsonPath);
-  packageJson.deprecated = `This package has been moved to the philips-labs/argus-panotes repository. You should migrate to using ${newPackageName} instead.`;
+  packageJson.deprecated = `This package has been moved to the philips-labs/argus-panoptes repository. You should migrate to using ${newPackageName} instead.`;
   packageJson.backstage ??= {};
   packageJson.backstage.moved = newPackageName;
   await fs.writeJson(packageJsonPath, packageJson);
@@ -336,7 +336,7 @@ export default async (opts: OptionValues) => {
     // Fix the repositories field in the new repo
     movedPackageJson.repository = {
       type: 'git',
-      url: 'https://github.com/philips-labs/argus-panotes',
+      url: 'https://github.com/philips-labs/argus-panoptes',
       directory: `workspaces/${workspaceName}/${packageToBeMoved.relativeDir}`,
     };
 
@@ -455,7 +455,7 @@ export default async (opts: OptionValues) => {
     packages: packagesToBeMoved.map(p => p.packageJson.name),
     workspacePath: monorepoRoot,
     message:
-      'These packages have been migrated to the [philips-labs/argus-panotes](https://github.com/philips-labs/argus-panotes) repository.',
+      'These packages have been migrated to the [philips-labs/argus-panoptes](https://github.com/philips-labs/argus-panoptes) repository.',
   });
 
   console.log(chalk.yellow`Running yarn install in new repository`);
