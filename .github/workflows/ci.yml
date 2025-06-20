@@ -11,11 +11,6 @@ concurrency:
 
 permissions:
   contents: read
-  packages: read
-
-env:
-  GITHUB_TOKEN: ${{ github.token }}
-  YARN_NPM_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   find-changed-workspaces:
@@ -123,31 +118,6 @@ jobs:
       - name: test changed packages
         run: yarn backstage-cli repo test --coverage --maxWorkers=3
 
-      # Prepare SonarQube token name based on workspace name
-      - name: Set SonarQube token name
-        if: hashFiles(format('workspaces/{0}/sonar-project.properties', matrix.workspace)) != ''
-        id: sonar-token-name
-        run: |
-          WORKSPACE="${{ matrix.workspace }}"
-          # Remove -workspace suffix if present
-          if [[ "$WORKSPACE" == *-workspace ]]; then
-            WORKSPACE=${WORKSPACE%-workspace}
-          fi
-          # Replace hyphens with underscores and convert to uppercase
-          TOKEN_NAME=$(echo "${WORKSPACE}" | tr '-' '_' | tr ' ' '_' | tr '[:lower:]' '[:upper:]')
-          echo "token_name=${TOKEN_NAME}_SONAR_TOKEN" >> $GITHUB_OUTPUT
-
-      - name: SonarQube Scan
-        if: hashFiles(format('workspaces/{0}/sonar-project.properties', matrix.workspace)) != ''
-        uses: SonarSource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v5.2.0
-        with:
-          projectBaseDir: ./workspaces/${{ matrix.workspace }}
-        env:
-          # Secret name format: WORKSPACE_NAME_SONAR_TOKEN (should match the sub-project name used when creating the SQ project in the developer portal)
-          # Naming rules: uppercase, hyphens replaced with underscores, '-workspace' suffix removed if present
-          SONAR_TOKEN: ${{ secrets[steps.sonar-token-name.outputs.token_name] }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
       - name: ensure clean working directory
         run: |
           if files=$(git ls-files --exclude-standard --others --modified) && [[ -z "$files" ]]; then
@@ -201,12 +171,3 @@ jobs:
             || contains(needs.*.result, 'cancelled')
             || contains(needs.*.result, 'skipped')
           }}
-
-  # Commented out until GHAS is activated on the repo
-  # dependency-review:
-  #   runs-on: [ubuntu-latest]
-  #   steps:
-  #     - name: "Checkout Repository"
-  #       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-  #     - name: "Dependency Review"
-  #       uses: actions/dependency-review-action@72eb03d02c7872a771aacd928f3123ac62ad6d3a # v4.3.3
