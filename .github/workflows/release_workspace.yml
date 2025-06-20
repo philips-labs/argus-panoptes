@@ -4,22 +4,32 @@ on:
   workflow_dispatch:
     inputs:
       workspace:
-        description: "Name of the Workspace"
+        description: 'Name of the Workspace'
         required: true
         type: string
       force_release:
-        description: "Force release even if no changesets are present"
+        description: 'Force release even if no changesets are present'
         required: false
         type: boolean
+      branch:
+        description: 'Branch to run the workflow on'
+        required: false
+        default: 'main'
+        type: string
   workflow_call:
     inputs:
       force_release:
-        description: "Force release even if no changesets are present"
+        description: 'Force release even if no changesets are present'
         required: false
         type: boolean
       workspace:
-        description: "Name of the Workspace"
+        description: 'Name of the Workspace'
         required: true
+        type: string
+      branch:
+        description: 'Branch to run the workflow on'
+        required: false
+        default: 'main'
         type: string
 
 concurrency:
@@ -27,7 +37,7 @@ concurrency:
 
 jobs:
   changesets-pr:
-    name: Update Version Packages PR for ${{ inputs.workspace }}
+    name: Update Version Packages PR for ${{ inputs.workspace }} on branch ${{ inputs.branch }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,18 +49,23 @@ jobs:
       needs_release: ${{ steps.release_check.outputs.needs_release }}
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
+        with:
+          ref: ${{ inputs.branch }}
       - name: Set up Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/ # Needed for auth
 
+      - name: Enable Corepack
+        run: corepack enable
+        
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -62,20 +77,27 @@ jobs:
         run: yarn install --immutable
 
       - name: Fetch previous commit for release check
-        run: git fetch origin '${{ github.event.before }}'
+        run: git fetch --depth=2 origin ${{ inputs.branch }}
+
+      - name: Fetch the commit that triggered the workflow (used by backstage/changesets-action)
+        run: git fetch origin ${{ github.sha }}
+        continue-on-error: true
 
       - name: Check if release
         id: release_check
         if: inputs.force_release != true
-        run: node ../../scripts/ci/check-if-release.js
+        run: |
+          yarn install
+          node scripts/ci/check-if-release.js
+        working-directory: ./
         env:
           WORKSPACE_NAME: ${{ inputs.workspace }}
-          COMMIT_SHA_BEFORE: "${{ github.event.before }}"
+          COMMIT_SHA_BEFORE: '${{ github.event.before }}'
 
       - name: Update Version Packages (${{ inputs.workspace }}) PR
         id: changesets-pr
         if: steps.release_check.outputs.needs_release != 'true' || inputs.force_release != true
-        uses: backstage/changesets-action@a39baf18913e669734ffb00c2fd9900472cfa240 # v2.3.2
+        uses: backstage/changesets-action@291bfc1f76d1dcfbf967f5810dc0423592eae09a # v2.3.1
         with:
           title: Version Packages (${{ inputs.workspace }})
           cwd: workspaces/${{ inputs.workspace }}
@@ -86,8 +108,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
-    name: Release workspace ${{ inputs.workspace }}
+    name: Release workspace ${{ inputs.workspace }} on branch ${{ inputs.branch }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # needed for publish provenance
     needs: changesets-pr
     if: needs.changesets-pr.outputs.needs_release == 'true' || inputs.force_release == true
     defaults:
@@ -99,18 +124,24 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
+        with:
+          ref: ${{ inputs.branch }}
       - name: Set up Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/ # Needed for auth
+
+      - name: Install root dependencies
+        run: yarn install --immutable
+        working-directory: ${{ github.workspace }}
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+      - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
@@ -129,6 +160,13 @@ jobs:
       - name: publish
         run: |
           yarn config set -H 'npmAuthToken' "${{secrets.NPM_TOKEN}}"
-          yarn workspaces foreach --all -v --no-private npm publish --access public --tolerate-republish
+          yarn workspaces foreach -W -v --no-private npm publish --access public --provenance --tolerate-republish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create tag
+        working-directory: ${{ github.workspace }}/scripts/ci
+        run: node create-tag.js
+        env:
+          WORKSPACE_NAME: ${{ inputs.workspace }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
