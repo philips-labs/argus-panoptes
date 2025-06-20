@@ -37,10 +37,6 @@ jobs:
     name: Maybe release ${{ matrix.workspace }}
     needs: find-changed-workspaces
     if: ${{ needs.find-changed-workspaces.outputs.workspaces != '[]' }}
-    permissions:
-      packages: write
-      contents: write
-      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
