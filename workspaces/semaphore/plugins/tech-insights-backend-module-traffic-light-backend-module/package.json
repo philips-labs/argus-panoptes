@@ -1,6 +1,6 @@
 {
   "name": "@philips-labs/plugin-tech-insights-backend-module-traffic-light-backend-module",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "description": "The traffic-light-backend-module backend module for the tech-insights plugin.",
   "main": "src/index.ts",
