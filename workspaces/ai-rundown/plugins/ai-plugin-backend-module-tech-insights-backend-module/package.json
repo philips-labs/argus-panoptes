@@ -1,6 +1,6 @@
 {
   "name": "@philips-labs/plugin-ai-plugin-backend-module-tech-insights-backend-module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "The tech-insights-backend-module backend module for the ai-plugin plugin.",
   "main": "src/index.ts",
