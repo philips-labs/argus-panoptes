@@ -28,7 +28,6 @@ import SearchIcon from '@material-ui/icons/Search';
 import { MyGroupsSidebarItem } from '@backstage/plugin-org';
 import GroupIcon from '@material-ui/icons/People';
 import TrafficIcon from '@mui/icons-material/Traffic';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 const useSidebarLogoStyles = makeStyles({
   root: {
@@ -81,11 +80,6 @@ export const Root = ({ children }: PropsWithChildren<{}>) => (
           icon={TrafficIcon}
           to="traffic-light"
           text="Traffic-Light Plugin"
-        />
-        <SidebarItem
-          icon={AutoAwesomeIcon}
-          to="ai-plugin"
-          text="AI-Summary Plugin"
         />
         {/* End global nav */}
         <SidebarDivider />

@@ -298,7 +298,7 @@ describe('BlackDuckUtils', () => {
       expect(result[2].security_risks_critical).toBe(1);
     });
 
-    it('should prioritize by high security risks whencritical security risks are equal', async () => {
+    it('should prioritize by high security risks when critical security risks are equal', async () => {
       const entities = [
         createMockEntity('low-risks'),
         createMockEntity('high-risks'),

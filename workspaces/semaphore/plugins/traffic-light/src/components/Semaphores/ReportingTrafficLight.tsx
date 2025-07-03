@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useEffect, useState, useCallback } from 'react';
 import { Entity } from '@backstage/catalog-model';
 import { useApi } from '@backstage/core-plugin-api';
 import { techInsightsApiRef } from '@backstage/plugin-tech-insights';
@@ -28,77 +28,123 @@ export const ReportingTrafficLight = ({
     'green' | 'yellow' | 'red' | 'gray' | 'white'
   >('white');
   const [reason, setReason] = useState('Loading Reporting pipeline data...');
+
   const techInsightsApi = useApi(techInsightsApiRef);
   const catalogApi = useApi(catalogApiRef);
-
   const reportingUtils = useMemo(() => new ReportingUtils(), []);
 
+  /**
+   * Fetches the red threshold from system entity annotation
+   * Uses defensive programming instead of exception handling
+   */
+  const fetchRedThreshold = useCallback(
+    async (entityList: Entity[]): Promise<number> => {
+      const defaultThreshold = 0.33;
+
+      if (!entityList.length) return defaultThreshold;
+
+      const systemName = entityList[0].spec?.system;
+      const namespace = entityList[0].metadata.namespace ?? 'default';
+
+      if (!systemName) return defaultThreshold;
+
+      const systemEntityRef = {
+        kind: 'System',
+        namespace,
+        name:
+          typeof systemName === 'string'
+            ? systemName
+            : JSON.stringify(systemName),
+      };
+
+      const systemEntity = await catalogApi.getEntityByRef(systemEntityRef);
+
+      const thresholdAnnotation =
+        systemEntity?.metadata.annotations?.['reporting-check-threshold-red'];
+
+      if (!thresholdAnnotation) return defaultThreshold;
+
+      const parsed = parseFloat(thresholdAnnotation);
+      return isNaN(parsed) ? defaultThreshold : parsed;
+    },
+    [catalogApi],
+  );
+
+  /**
+   * Fetches reporting pipeline checks for all entities
+   * Lets individual promise rejections bubble up naturally
+   */
+  const fetchReportingChecks = useCallback(
+    async (entityList: Entity[]) => {
+      const checkPromises = entityList.map(entity =>
+        reportingUtils.getReportingPipelineChecks(techInsightsApi, {
+          kind: entity.kind,
+          namespace: entity.metadata.namespace ?? 'default',
+          name: entity.metadata.name,
+        }),
+      );
+
+      const results = await Promise.allSettled(checkPromises);
+
+      // Count only fulfilled promises where successRateCheck is false
+      const failures = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<any>).value)
+        .filter(r => r?.successRateCheck === false).length;
+
+      return { failures, total: entityList.length };
+    },
+    [reportingUtils, techInsightsApi],
+  );
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!entities.length) {
+    if (!entities.length) {
+      setColor('gray');
+      setReason('No entities selected');
+      return;
+    }
+
+    const processData = async () => {
+      // Default values for resilient operation
+      let redThreshold = 0.33;
+      let failures = 0;
+      let total;
+
+      // Attempt to fetch threshold - if it fails, use default
+      const thresholdPromise = fetchRedThreshold(entities);
+      const checksPromise = fetchReportingChecks(entities);
+
+      // Use Promise.allSettled to handle both success and failure cases
+      const [thresholdResult, checksResult] = await Promise.allSettled([
+        thresholdPromise,
+        checksPromise,
+      ]);
+
+      // Extract threshold if successful, otherwise keep default
+      if (thresholdResult.status === 'fulfilled') {
+        redThreshold = thresholdResult.value;
+      }
+
+      // Extract check results if successful, otherwise show error
+      if (checksResult.status === 'fulfilled') {
+        ({ failures, total } = checksResult.value);
+      } else {
         setColor('gray');
-        setReason('No entities selected');
+        setReason('Error fetching reporting pipeline data');
         return;
       }
 
-      try {
-        // 1. Fetch red threshold from system annotation
-        let redThreshold = 0.33;
-        try {
-          const systemName = entities[0].spec?.system;
-          const namespace = entities[0].metadata.namespace || 'default';
+      // Determine color and reason based on results
+      const { color: computedColor, reason: computedReason } =
+        determineSemaphoreColor(failures, total, redThreshold);
 
-          if (systemName) {
-            const systemEntity = await catalogApi.getEntityByRef({
-              kind: 'System',
-              namespace,
-              name:
-                typeof systemName === 'string'
-                  ? systemName
-                  : String(systemName),
-            });
-
-            const thresholdAnnotation =
-              systemEntity?.metadata.annotations?.[
-                'reporting-check-threshold-red'
-              ];
-            if (thresholdAnnotation) {
-              redThreshold = parseFloat(thresholdAnnotation);
-            }
-          }
-        } catch (err) {
-          // Could not fetch system configuration; using defaults.
-        }
-
-        // 2. Run reporting pipeline checks
-        const results = await Promise.all(
-          entities.map(entity =>
-            reportingUtils.getReportingPipelineChecks(techInsightsApi, {
-              kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
-              name: entity.metadata.name,
-            }),
-          ),
-        );
-
-        const failures = results.filter(
-          r => r.successRateCheck === false,
-        ).length;
-
-        // 3. Determine color and reason
-        const { color: computedColor, reason: computedReason } =
-          determineSemaphoreColor(failures, entities.length, redThreshold);
-
-        setColor(computedColor);
-        setReason(computedReason);
-      } catch (err) {
-        setColor('gray');
-        setReason('Error fetching reporting pipeline data');
-      }
+      setColor(computedColor);
+      setReason(computedReason);
     };
 
-    fetchData();
-  }, [entities, techInsightsApi, catalogApi, reportingUtils]);
+    // Let any unhandled promise rejections bubble up to error boundaries
+    processData();
+  }, [entities, fetchRedThreshold, fetchReportingChecks]);
 
   return <BaseTrafficLight color={color} tooltip={reason} onClick={onClick} />;
 };

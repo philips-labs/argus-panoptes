@@ -1,5 +1,8 @@
-import { FC, useMemo, useState, useEffect } from 'react';
-import { Grid, Paper, Typography, Link } from '@material-ui/core';
+/**
+ * Foundation Pipeline Dialog Component
+ * Shows metrics for foundation build pipeline success rates
+ */
+import { useEffect, useMemo, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { techInsightsApiRef } from '@backstage/plugin-tech-insights';
@@ -7,10 +10,20 @@ import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { Entity } from '@backstage/catalog-model';
 import { BaseSemaphoreDialog } from './BaseSemaphoreDialogs';
 import { FoundationUtils } from '../../utils/foundationUtils';
-import type { GridSize } from '@material-ui/core';
 import { SemaphoreData } from './types';
-import { determineSemaphoreColor } from '../utils';
+import {
+  PipelineMetrics,
+  processEntities,
+  aggregateMetrics,
+  buildSemaphoreData,
+  getLowestSuccessRepos,
+  renderPipelineMetrics,
+  getSystemConfig,
+} from '../../utils/PipelineMetricsUtils';
 
+/**
+ * Styles for the dialog components
+ */
 const useStyles = makeStyles(theme => ({
   metricBox: {
     padding: theme.spacing(2),
@@ -36,28 +49,35 @@ interface FoundationSemaphoreDialogProps {
   entities?: Entity[];
 }
 
-export const FoundationSemaphoreDialog: FC<FoundationSemaphoreDialogProps> = ({
-  open,
-  onClose,
-  entities = [],
-}) => {
+/**
+ * Main component for displaying Foundation Pipeline metrics in a dialog.
+ *
+ * Shows workflow run success/failure statistics across repositories and displays
+ * a traffic light indicator based on the system's health status.
+ */
+export const FoundationSemaphoreDialog: React.FC<
+  FoundationSemaphoreDialogProps
+> = ({ open, onClose, entities = [] }) => {
   const classes = useStyles();
   const techInsightsApi = useApi(techInsightsApiRef);
   const catalogApi = useApi(catalogApiRef);
   const foundationUtils = useMemo(() => new FoundationUtils(), []);
 
+  // Component state
   const [isLoading, setIsLoading] = useState(false);
-  const [metrics, setMetrics] = useState({
+  const [metrics, setMetrics] = useState<PipelineMetrics>({
     totalSuccess: 0,
     totalFailure: 0,
     totalRuns: 0,
     successRate: 0,
   });
 
+  // Repositories with lowest success rates for display
   const [lowestSuccessRepos, setLowestSuccessRepos] = useState<
     { name: string; url: string; successRate: number }[]
   >([]);
 
+  // Semaphore data containing color and summary
   const [data, setData] = useState<SemaphoreData>({
     color: 'gray',
     metrics: {},
@@ -65,6 +85,9 @@ export const FoundationSemaphoreDialog: FC<FoundationSemaphoreDialogProps> = ({
     details: [],
   });
 
+  /**
+   * Effect hook to fetch metrics data when the dialog opens
+   */
   useEffect(() => {
     if (!open || entities.length === 0) return;
 
@@ -72,188 +95,70 @@ export const FoundationSemaphoreDialog: FC<FoundationSemaphoreDialogProps> = ({
 
     const fetchMetrics = async () => {
       try {
-        // 1. Fetch system threshold and configured repositories
-        let redThreshold = 0.33;
-        let configuredRepoNames: string[] = [];
+        // Get system configuration for thresholds and repository list
+        const { redThreshold, configuredRepoNames } = await getSystemConfig(
+          catalogApi,
+          entities,
+          'foundation-check-threshold-red',
+          'foundation-configured-repositories',
+        );
 
-        try {
-          const systemName = entities[0].spec?.system;
-          const namespace = entities[0].metadata.namespace || 'default';
-
-          if (systemName) {
-            const systemEntity = await catalogApi.getEntityByRef({
-              kind: 'System',
-              namespace,
-              name:
-                typeof systemName === 'string'
-                  ? systemName
-                  : String(systemName),
-            });
-
-            const thresholdAnnotation =
-              systemEntity?.metadata.annotations?.[
-                'foundation-check-threshold-red'
-              ];
-            if (thresholdAnnotation) {
-              redThreshold = parseFloat(thresholdAnnotation);
-            }
-
-            // Get configured repositories for foundation checks
-            const configuredReposAnnotation =
-              systemEntity?.metadata.annotations?.[
-                'foundation-configured-repositories'
-              ];
-            if (configuredReposAnnotation) {
-              configuredRepoNames = configuredReposAnnotation
-                .split(',')
-                .map(name => name.trim())
-                .filter(name => name.length > 0);
-            }
-          }
-        } catch (err) {
-          // console.warn('Could not fetch system configuration; using defaults');
-        }
-
-        // 2. Filter entities to only include configured repositories
+        // Filter entities based on configured repository names if provided
         const filteredEntities =
           configuredRepoNames.length > 0
             ? entities.filter(entity =>
                 configuredRepoNames.includes(entity.metadata.name),
               )
-            : entities; // Fallback to all entities if no configuration found
+            : entities;
 
         if (filteredEntities.length === 0) {
-          setMetrics({
-            totalSuccess: 0,
-            totalFailure: 0,
-            totalRuns: 0,
-            successRate: 0,
-          });
-          setLowestSuccessRepos([]);
           setData({
             color: 'gray',
-            metrics: {},
             summary: 'No configured repositories found for foundation checks.',
+            metrics: {},
             details: [],
           });
           return;
         }
 
-        // 3. Gather metrics for filtered entities
-        const results = await Promise.all(
-          filteredEntities.map(async entity => {
-            const ref = {
-              kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
-              name: entity.metadata.name,
-            };
-
-            const [facts, check] = await Promise.all([
-              foundationUtils.getFoundationPipelineFacts(techInsightsApi, ref),
-              foundationUtils.getFoundationPipelineChecks(techInsightsApi, ref),
-            ]);
-
-            const successRate =
-              facts.successWorkflowRunsCount + facts.failureWorkflowRunsCount >
-              0
-                ? (facts.successWorkflowRunsCount /
-                    (facts.successWorkflowRunsCount +
-                      facts.failureWorkflowRunsCount)) *
-                  100
-                : 0;
-
-            const projectSlug =
-              entity.metadata.annotations?.['github.com/project-slug'];
-            const url = projectSlug
-              ? `https://github.com/${projectSlug}/actions`
-              : '#';
-
-            return {
-              name: entity.metadata.name,
-              url,
-              successRate: parseFloat(successRate.toFixed(2)),
-              successWorkflowRunsCount: facts.successWorkflowRunsCount,
-              failureWorkflowRunsCount: facts.failureWorkflowRunsCount,
-              failedCheck: check.successRateCheck === false,
-            };
-          }),
+        // Process entities to get metrics data
+        const results = await processEntities(
+          filteredEntities,
+          techInsightsApi,
+          foundationUtils.getFoundationPipelineFacts,
+          foundationUtils.getFoundationPipelineChecks,
         );
 
-        const totalSuccess = results.reduce(
-          (sum, r) => sum + r.successWorkflowRunsCount,
-          0,
-        );
-        const totalFailure = results.reduce(
-          (sum, r) => sum + r.failureWorkflowRunsCount,
-          0,
-        );
-        const totalRuns = totalSuccess + totalFailure;
-        const successRate =
-          totalRuns > 0 ? (totalSuccess / totalRuns) * 100 : 0;
+        // Calculate aggregate metrics
+        const aggregated = aggregateMetrics(results);
 
-        // 4. Determine color using imported utility based on filtered entities
+        // Count failures
         const failures = results.filter(r => r.failedCheck).length;
-        const { color } = determineSemaphoreColor(
+
+        // Build semaphore data with configured repo count
+        const semaphoreData = buildSemaphoreData(
+          aggregated,
           failures,
           filteredEntities.length,
           redThreshold,
+          configuredRepoNames.length > 0 ? filteredEntities.length : undefined,
         );
 
-        // 5. Compose summary
-        let summary = 'Code quality is excellent with no significant issues.';
-        if (color === 'red') {
-          summary = 'Critical code quality issues require immediate attention.';
-        } else if (color === 'yellow') {
-          summary = 'Code quality issues need to be addressed before release.';
-        }
+        // Get repositories with lowest success rates
+        const lowest = getLowestSuccessRepos(results);
 
-        // Add info about configured repositories
-        if (configuredRepoNames.length > 0) {
-          summary += ` (Based on ${filteredEntities.length} configured repositories)`;
-        }
-
-        const lowest = [...results]
-          .sort((a, b) => a.successRate - b.successRate)
-          .slice(0, 5)
-          .map(({ name, url, successRate: itemSuccessRate }) => ({
-            name,
-            url,
-            successRate: itemSuccessRate,
-          }));
-
-        setMetrics({
-          totalSuccess,
-          totalFailure,
-          totalRuns,
-          successRate: parseFloat(successRate.toFixed(2)),
-        });
-
+        // Update state
+        setMetrics(aggregated);
         setLowestSuccessRepos(lowest);
-
-        setData({
-          color,
-          summary,
-          metrics: {
-            totalSuccess,
-            totalFailure,
-            totalRuns,
-            successRate: parseFloat(successRate.toFixed(2)),
-          },
-          details: [],
-        });
-      } catch (e) {
-        // console.error('Failed to fetch Foundation pipeline data:', e);
-        setMetrics({
-          totalSuccess: 0,
-          totalFailure: 0,
-          totalRuns: 0,
-          successRate: 0,
-        });
-        setLowestSuccessRepos([]);
+        setData(semaphoreData);
+      } catch (error) {
+        // Error fallback with more details
         setData({
           color: 'gray',
           metrics: {},
-          summary: 'Failed to load metrics.',
+          summary: `Failed to load metrics: ${
+            error instanceof Error ? error.message : 'Unknown error'
+          }`,
           details: [],
         });
       } finally {
@@ -264,53 +169,11 @@ export const FoundationSemaphoreDialog: FC<FoundationSemaphoreDialogProps> = ({
     fetchMetrics();
   }, [open, entities, techInsightsApi, catalogApi, foundationUtils]);
 
-  const renderMetrics = () => (
-    <>
-      <Grid container spacing={2}>
-        {[
-          ['Successful Runs', metrics.totalSuccess, 4, '#4caf50'],
-          ['Failed Runs', metrics.totalFailure, 4, '#f44336'],
-          ['Success Rate (%)', metrics.successRate, 4, '#2196f3'],
-        ].map(([label, value, size, color], index) => (
-          <Grid item xs={size as GridSize} key={index}>
-            <Paper className={classes.metricBox} elevation={1}>
-              <Typography
-                variant="h4"
-                className={classes.metricValue}
-                style={{ color: color as string }}
-              >
-                {value}
-              </Typography>
-              <Typography className={classes.metricLabel}>{label}</Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+  // Render metrics display using the shared utility
+  const renderMetrics = () =>
+    renderPipelineMetrics(metrics, lowestSuccessRepos, classes);
 
-      {lowestSuccessRepos.length > 0 && (
-        <Grid container spacing={2} className={classes.repoList}>
-          {lowestSuccessRepos.map(repo => (
-            <Grid item xs={12} key={repo.name}>
-              <Paper className={classes.metricBox} elevation={1}>
-                <Link
-                  href={repo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={classes.metricValue}
-                >
-                  {repo.name}
-                </Link>
-                <Typography className={classes.metricLabel}>
-                  Success Rate: {repo.successRate}%
-                </Typography>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      )}
-    </>
-  );
-
+  // Render the dialog with all metrics and status information
   return (
     <BaseSemaphoreDialog
       open={open}

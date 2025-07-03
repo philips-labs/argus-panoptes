@@ -8,9 +8,10 @@ import {
 } from '@backstage-community/plugin-tech-insights-node';
 import { CatalogClient } from '@backstage/catalog-client';
 import { JsonObject } from '@backstage/types';
+import { loadOctokit } from '../dependabot/octokitLoader'; // Adjust the import path as needed
 
 // Define interfaces for the security findings as JSON-compatible types
-interface codeScanningFinding extends JsonObject {
+interface CodeScanningFinding extends JsonObject {
   severity: string;
   description: string;
   direct_link: string;
@@ -18,10 +19,9 @@ interface codeScanningFinding extends JsonObject {
 }
 
 // Dictionary structure for security findings where the key is the alert number/id
-// Must be JsonObject compatible
 // This way we store all the issues per repository
-interface codeScanningFindingsDict extends JsonObject {
-  [alertId: string]: codeScanningFinding;
+interface CodeScanningFindingsDict extends JsonObject {
+  [alertId: string]: CodeScanningFinding;
 }
 
 /**
@@ -86,7 +86,7 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
       );
       const githubConfig = githubConfigs?.[0];
       token = githubConfig?.getOptionalString('token');
-    } catch (e) {
+    } catch {
       return [];
     }
 
@@ -110,10 +110,7 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
       return entity.metadata.annotations?.['github.com/project-slug'];
     });
 
-    // Use dynamic import for Octokit
-    const { Octokit } = await import('@octokit/rest');
-
-    // Initialize GitHub API client with token
+    const Octokit = await loadOctokit();
     const octokit = new Octokit({ auth: token });
 
     // Process each entity with GitHub integration
@@ -121,7 +118,7 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
       githubEntities.map(async entity => {
         // Extract owner and repo from the 'github.com/project-slug' annotation
         const projectSlug =
-          entity.metadata.annotations?.['github.com/project-slug'] || '';
+          entity.metadata.annotations?.['github.com/project-slug'] ?? '';
         const [owner, repo] = projectSlug.split('/');
 
         try {
@@ -148,46 +145,67 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
           );
 
           // Process code scanning alerts to extract only the required information
-          const codeScanningAlerts: codeScanningFindingsDict = {};
+          const codeScanningAlerts: CodeScanningFindingsDict = {};
 
-          codeScanningResponse.data.forEach(alert => {
-            // Extract necessary information for code scanning alerts
-            const alertId = `code-${alert.number}`;
-            const instance = alert.most_recent_instance;
-            const location = instance?.location;
-            const start_line = location?.start_line || 1; // Default to line 1 if not provided
+          codeScanningResponse.data.forEach(
+            (alert: {
+              number: number;
+              rule?: {
+                security_severity_level?: string;
+                description?: string;
+                name?: string;
+              };
+              created_at?: string;
+              most_recent_instance?: {
+                location?: { path?: string; start_line?: number };
+                commit_sha?: string;
+              };
+            }) => {
+              // Extract necessary information for code scanning alerts
+              const alertId = `code-${alert.number}`;
+              const instance = alert.most_recent_instance;
+              const location = instance?.location;
+              const start_line = location?.start_line ?? 1; // Default to line 1 if not provided
 
-            // Create finding with only the requested fields
-            const finding: codeScanningFinding = {
-              severity: alert.rule?.security_severity_level || 'unknown',
-              description:
-                alert.rule?.description ||
-                alert.rule?.name ||
-                'No description available',
-              created_at: alert.created_at || '',
-              direct_link: `https://github.com/${owner}/${repo}/blob/${instance?.commit_sha}/${location?.path}#L${start_line}`,
-            };
+              // Create finding with only the requested fields
+              const finding: CodeScanningFinding = {
+                severity: alert.rule?.security_severity_level ?? 'unknown',
+                description:
+                  alert.rule?.description ??
+                  alert.rule?.name ??
+                  'No description available',
+                created_at: alert.created_at ?? '',
+                direct_link: `https://github.com/${owner}/${repo}/blob/${instance?.commit_sha}/${location?.path}#L${start_line}`,
+              };
 
-            // Add to dictionary with alert number as the key
-            codeScanningAlerts[alertId] = finding;
-          });
+              // Add to dictionary with alert number as the key
+              codeScanningAlerts[alertId] = finding;
+            },
+          );
 
           // Process secret scanning alerts to create a dictionary with only the requested fields
-          const secretScanningAlerts: codeScanningFindingsDict = {};
+          const secretScanningAlerts: CodeScanningFindingsDict = {};
 
-          secretScanningResponse.data.forEach(alert => {
-            const alertId = `secret-${alert.number}`;
+          secretScanningResponse.data.forEach(
+            (alert: {
+              number: number;
+              secret_type?: string;
+              created_at?: string;
+              html_url?: string;
+            }) => {
+              const alertId = `secret-${alert.number}`;
 
-            // Create a simplified finding with just basic information
-            secretScanningAlerts[alertId] = {
-              severity: 'high', // Secret scanning alerts are typically high severity
-              description: `Secret of type ${
-                alert.secret_type || 'unknown'
-              } found`,
-              created_at: alert.created_at || '',
-              direct_link: alert.html_url || '',
-            };
-          });
+              // Create a simplified finding with just basic information
+              secretScanningAlerts[alertId] = {
+                severity: 'high', // Secret scanning alerts are typically high severity
+                description: `Secret of type ${
+                  alert.secret_type ?? 'unknown'
+                } found`,
+                created_at: alert.created_at ?? '',
+                direct_link: alert.html_url ?? '',
+              };
+            },
+          );
 
           const severityCounts = {
             critical: 0,
@@ -214,7 +232,6 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
                 severityCounts.low++;
                 break;
               default:
-                // Other severity levels (e.g., 'unknown') are not counted.
                 break;
             }
           });
@@ -223,7 +240,7 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
           return {
             entity: {
               kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
+              namespace: entity.metadata.namespace ?? 'default',
               name: entity.metadata.name,
             },
             facts: {
@@ -241,7 +258,7 @@ export const githubAdvancedSecurityFactRetriever: FactRetriever = {
               secretScanningAlerts: secretScanningAlerts as JsonObject,
             },
           } as TechInsightFact;
-        } catch (err: any) {
+        } catch {
           return null;
         }
       }),

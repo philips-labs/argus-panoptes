@@ -42,8 +42,6 @@ const DEFAULT_CHECKS: FoundationPipelineChecks = {
  * evaluating Foundation‑pipeline data.
  */
 export class FoundationUtils {
-  // constructor() {}
-
   /**
    * Fetches Foundation pipeline facts for a given entity using the Tech Insights API.
    * Returns metrics like total workflow runs, unique workflows, success count, failure count, and success rate.
@@ -75,7 +73,7 @@ export class FoundationUtils {
         failureWorkflowRunsCount: Number(facts.failureWorkflowRunsCount ?? 0),
         successRate: Number(facts.successRate ?? 0),
       };
-    } catch (error) {
+    } catch {
       return { ...DEFAULT_METRICS };
     }
   }
@@ -107,7 +105,7 @@ export class FoundationUtils {
       return {
         successRateCheck: successRateCheck?.result === true,
       };
-    } catch (error) {
+    } catch {
       return { ...DEFAULT_CHECKS };
     }
   }

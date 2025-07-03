@@ -1,4 +1,4 @@
-import { getVoidLogger } from '@backstage/backend-common';
+import { mockServices } from '@backstage/backend-test-utils';
 import { createSonarCloudFactRetriever } from '../sonarCloudFactRetriever';
 import { ConfigReader } from '@backstage/config';
 import { Entity } from '@backstage/catalog-model';
@@ -26,7 +26,7 @@ describe('SonarCloud Fact Retriever', () => {
     },
   });
 
-  const mockLogger = getVoidLogger();
+  const mockLogger = mockServices.logger.mock();
 
   // Mock discovery API for service URLs
   const mockDiscovery = {

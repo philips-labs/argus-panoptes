@@ -184,7 +184,7 @@ export const createSonarCloudFactRetriever = (
           return {
             entity: {
               name: entity.metadata.name,
-              namespace: entity.metadata.namespace || 'default',
+              namespace: entity.metadata.namespace ?? 'default',
               kind: entity.kind,
             },
             facts: facts,

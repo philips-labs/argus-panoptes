@@ -5,9 +5,7 @@ import { githubAdvancedSecurityFactRetriever } from './githubASFactRetriever';
 
 // Mock dependencies
 jest.mock('@backstage/catalog-client');
-jest.mock('@octokit/rest', () => ({
-  Octokit: jest.fn(),
-}));
+jest.mock('../dependabot/octokitLoader');
 
 const mockConfig = {
   getOptionalConfigArray: jest.fn(),
@@ -44,9 +42,9 @@ describe('githubAdvancedSecurityFactRetriever', () => {
     require('@backstage/catalog-client').CatalogClient.mockImplementation(
       () => mockCatalogClient,
     );
-    jest.doMock('@octokit/rest', () => ({
-      Octokit: jest.fn(() => mockOctokit),
-    }));
+    require('../dependabot/octokitLoader').loadOctokit.mockResolvedValue(
+      jest.fn(() => mockOctokit),
+    );
   });
 
   const mockHandlerParams = {
@@ -180,6 +178,12 @@ describe('githubAdvancedSecurityFactRetriever', () => {
       created_at: '2023-01-01T00:00:00Z',
       direct_link: 'https://github.com/owner/repo/blob/abc123/src/app.js#L42',
     });
+    expect((result[0]?.facts.secretScanningAlerts as any)['secret-1']).toEqual({
+      severity: 'high',
+      description: 'Secret of type github_personal_access_token found',
+      created_at: '2023-01-01T00:00:00Z',
+      direct_link: 'https://github.com/owner/repo/security/secret-scanning/1',
+    });
   });
 
   it('should skip entities without GitHub annotations', async () => {
@@ -251,7 +255,7 @@ describe('githubAdvancedSecurityFactRetriever', () => {
     expect(result).toEqual([]);
   });
 
-  // counting the secuirty alerts by severity levels
+  // counting the security alerts by severity levels
   it('should count different severity levels correctly', async () => {
     mockConfig.getOptionalConfigArray.mockReturnValue([
       {
@@ -317,6 +321,7 @@ describe('githubAdvancedSecurityFactRetriever', () => {
       mockHandlerParams,
     );
 
+    expect(result).toHaveLength(1);
     expect(result[0]?.facts.criticalCount).toBe(1);
     expect(result[0]?.facts.highCount).toBe(1);
     expect(result[0]?.facts.mediumCount).toBe(1);
@@ -359,6 +364,7 @@ describe('githubAdvancedSecurityFactRetriever', () => {
       mockHandlerParams,
     );
 
+    expect(result).toHaveLength(1);
     expect(result[0]?.facts).toEqual({
       openCodeScanningAlertCount: 0,
       openSecretScanningAlertCount: 0,
@@ -368,6 +374,82 @@ describe('githubAdvancedSecurityFactRetriever', () => {
       lowCount: 0,
       codeScanningAlerts: {},
       secretScanningAlerts: {},
+    });
+  });
+
+  // Test handling of missing or null values (testing nullish coalescing)
+  it('should handle alerts with missing or null values', async () => {
+    mockConfig.getOptionalConfigArray.mockReturnValue([
+      {
+        getOptionalString: jest.fn().mockReturnValue('mock-token'),
+      },
+    ]);
+
+    mockAuth.getOwnServiceCredentials.mockResolvedValue({});
+    mockAuth.getPluginRequestToken.mockResolvedValue({
+      token: 'catalog-token',
+    });
+
+    const mockEntities = [
+      {
+        kind: 'Component',
+        metadata: {
+          name: 'test-component',
+          namespace: 'default',
+          annotations: {
+            'github.com/project-slug': 'owner/repo',
+          },
+        },
+      },
+    ];
+
+    mockCatalogClient.getEntities.mockResolvedValue({ items: mockEntities });
+
+    // Mock alerts with missing/null values
+    const mockCodeScanningAlerts = [
+      {
+        number: 1,
+        rule: {
+          // missing security_severity_level, description, and name
+        },
+        // missing created_at
+        most_recent_instance: {
+          commit_sha: 'abc123',
+          location: {
+            path: 'src/app.js',
+            // missing start_line
+          },
+        },
+      },
+    ];
+
+    const mockSecretScanningAlerts = [
+      {
+        number: 1,
+        // missing secret_type, created_at, html_url
+      },
+    ];
+
+    mockOctokit.request
+      .mockResolvedValueOnce({ data: mockCodeScanningAlerts })
+      .mockResolvedValueOnce({ data: mockSecretScanningAlerts });
+
+    const result = await githubAdvancedSecurityFactRetriever.handler(
+      mockHandlerParams,
+    );
+
+    expect(result).toHaveLength(1);
+    expect((result[0]?.facts.codeScanningAlerts as any)['code-1']).toEqual({
+      severity: 'unknown',
+      description: 'No description available',
+      created_at: '',
+      direct_link: 'https://github.com/owner/repo/blob/abc123/src/app.js#L1',
+    });
+    expect((result[0]?.facts.secretScanningAlerts as any)['secret-1']).toEqual({
+      severity: 'high',
+      description: 'Secret of type unknown found',
+      created_at: '',
+      direct_link: '',
     });
   });
 });

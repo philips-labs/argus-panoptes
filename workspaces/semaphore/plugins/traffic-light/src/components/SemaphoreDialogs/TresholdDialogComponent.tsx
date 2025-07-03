@@ -1,4 +1,3 @@
-import { FC } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,6 +7,9 @@ import {
   Button,
 } from '@material-ui/core';
 
+/**
+ * Props for configuring threshold settings dialog
+ */
 interface ThresholdDialogProps {
   open: boolean;
   onClose: () => void;
@@ -19,7 +21,7 @@ interface ThresholdDialogProps {
   >;
 }
 
-export const ThresholdDialog: FC<ThresholdDialogProps> = ({
+export const ThresholdDialog: React.FC<ThresholdDialogProps> = ({
   open,
   onClose,
   onExited,
@@ -27,6 +29,7 @@ export const ThresholdDialog: FC<ThresholdDialogProps> = ({
   thresholds,
   setThresholds,
 }) => {
+  // Available metrics for each monitoring tool
   const itemMetrics: { [key: string]: string[] } = {
     Dependabot: ['Number of repos'],
     BlackDuck: ['Critical security risks', 'High security risks'],
@@ -38,6 +41,7 @@ export const ThresholdDialog: FC<ThresholdDialogProps> = ({
     'Foundation Pipelines': ['Build Success Rate'],
   };
 
+  // Default threshold values for common tools
   const defaultThresholds: { [key: string]: { [metric: string]: string } } = {
     SonarQube: {
       Bugs: '0',
@@ -55,8 +59,10 @@ export const ThresholdDialog: FC<ThresholdDialogProps> = ({
     },
   };
 
+  // Get metrics for the currently selected tool
   const currentMetrics = itemMetrics[activeItem] || [];
 
+  // Update threshold values in parent component state
   const handleThresholdChange = (metric: string, value: string) => {
     setThresholds(prev => ({
       ...prev,
@@ -71,7 +77,9 @@ export const ThresholdDialog: FC<ThresholdDialogProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      onExited={onExited}
+      TransitionProps={{
+        onExited: onExited,
+      }}
       maxWidth="xs"
       fullWidth
     >

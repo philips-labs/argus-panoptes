@@ -52,14 +52,15 @@ export const determineBlackDuckColor = async (
   const systemEntity = await catalogApi.getEntityByRef({
     kind: 'system',
     namespace: 'default',
-    name: typeof systemName === 'string' ? systemName : String(systemName),
+    name:
+      typeof systemName === 'string' ? systemName : JSON.stringify(systemName),
   });
 
   // Get thresholds for traffic light colour from system annotations
   const proportion = parseFloat(
     systemEntity?.metadata.annotations?.[
       'tech-insights.io/blackduck-critical-check-percentage'
-    ] || '33',
+    ] ?? '33',
   );
 
   try {
@@ -68,7 +69,7 @@ export const determineBlackDuckColor = async (
       enabledEntities.map(entity =>
         blackDuckUtils.getBlackDuckChecks(techInsightsApi, {
           kind: entity.kind,
-          namespace: entity.metadata.namespace || 'default',
+          namespace: entity.metadata.namespace ?? 'default',
           name: entity.metadata.name,
         }),
       ),
@@ -93,22 +94,30 @@ export const determineBlackDuckColor = async (
 
     // Count the number of checks that failed for more than 1/3 of the entities
     const redCount = Object.values(counts).filter(
-      v => v > (enabledEntities.length * 100) / proportion,
+      v => v > (enabledEntities.length * proportion) / 100,
     ).length;
 
     if (Object.values(counts).every(v => v === 0)) {
       // All checks passed for all entities
       return { color: 'green', reason: 'All BlackDuck checks passed' };
-    } else if (counts.criticalSecurityCheckFails > 0 || redCount >= 1) {
+    } else if (counts.criticalSecurityCheckFails > 0) {
       // Critical security issues or at least one check failed for more than 1/3 of the entities
       return {
         color: 'red',
-        reason: `Critical security checks found or other severe security issues detected`,
+        reason: `Critical security issues found: ${counts.criticalSecurityCheckFails} entities failed the critical security check.`,
+      };
+    } else if (redCount >= 1) {
+      return {
+        color: 'red',
+        reason: `Severe security issues detected: ${redCount} checks failed by at least ${proportion}% of the entities.`,
       };
     }
     // Some security issues, but no critical issues and no checks failed for more than 1/3 of the entities
-    return { color: 'yellow', reason: `Some security issues detected` };
-  } catch (err) {
+    return {
+      color: 'yellow',
+      reason: `Some security issues detected: ${counts.highSecurityCheckFails} entities failed the high security risks check, ${counts.mediumSecurityCheckFails} entities failed the medium security risks check.`,
+    };
+  } catch {
     return { color: 'gray', reason: 'Error fetching BlackDuck data' };
   }
 };

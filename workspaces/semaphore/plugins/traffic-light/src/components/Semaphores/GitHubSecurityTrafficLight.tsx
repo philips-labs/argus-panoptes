@@ -178,7 +178,11 @@ function formatRedReason(
   if (totalChecks.mediumCheckTrue > (thresholds?.medium_red ?? 0)) {
     if (thresholds?.medium_red !== undefined) {
       parts.push(
-        `Medium severity issues are exceeded by ${totalChecks.mediumCheckTrue} repos, the threshold for this system is: ${thresholds.medium_red}`,
+        `Medium severity issues are exceeded by ${
+          totalChecks.mediumCheckTrue
+        } repos, the threshold for this system is: ${parseFloat(
+          thresholds.medium_red.toFixed(1),
+        )}`,
       );
     }
   }
@@ -197,14 +201,22 @@ function formatYellowReason(
   if (totalChecks.mediumCheckTrue > (thresholds?.medium_yellow ?? 0)) {
     if (thresholds?.medium_yellow !== undefined) {
       parts.push(
-        `Medium severity issues are exceeded by ${totalChecks.mediumCheckTrue} repos, the threshold for this system is: ${thresholds.medium_yellow}`,
+        `Medium severity issues are exceeded by ${
+          totalChecks.mediumCheckTrue
+        } repos, the threshold for this system is: ${parseFloat(
+          thresholds.medium_yellow.toFixed(1),
+        )}`,
       );
     }
   }
   if (totalChecks.lowCheckTrue > (thresholds?.low_yellow ?? 0)) {
     if (thresholds?.low_yellow !== undefined) {
       parts.push(
-        `Low severity issues are exceeded by ${totalChecks.lowCheckTrue} repos, the threshold for this system is: ${thresholds.low_yellow}`,
+        `Low severity issues are exceeded by ${
+          totalChecks.lowCheckTrue
+        } repos, the threshold for this system is: ${parseFloat(
+          thresholds.low_yellow.toFixed(1),
+        )}`,
       );
     }
   }
@@ -214,7 +226,7 @@ function formatYellowReason(
 /**
  * Extract security thresholds from system entity
  */
-function extractSecurityThresholds(
+export function extractSecurityThresholds(
   systemEntity: Entity | undefined,
   entityCount: number,
 ): SecurityThresholds {
@@ -287,9 +299,11 @@ export const GitHubSecurityTrafficLight = ({
 
         const systemEntity = await catalogApi.getEntityByRef({
           kind: 'System',
-          namespace: entities[0].metadata.namespace || 'default',
+          namespace: entities[0].metadata.namespace ?? 'default',
           name:
-            typeof systemName === 'string' ? systemName : String(systemName),
+            typeof systemName === 'string'
+              ? systemName
+              : JSON.stringify(systemName),
         });
 
         const thresholds = extractSecurityThresholds(
@@ -302,7 +316,7 @@ export const GitHubSecurityTrafficLight = ({
           entities.map(entity =>
             githubASUtils.getGitHubSecurityData(techInsightsApi, {
               kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
+              namespace: entity.metadata.namespace ?? 'default',
               name: entity.metadata.name,
             }),
           ),
@@ -316,8 +330,7 @@ export const GitHubSecurityTrafficLight = ({
         );
         setColor(result.color);
         setReason(result.reason);
-      } catch (err) {
-        // console.error('Error fetching GitHub Security data:', err);
+      } catch {
         setColor('gray');
         setReason('Failed to retrieve GitHub Security data');
       }
@@ -327,18 +340,16 @@ export const GitHubSecurityTrafficLight = ({
   }, [entities, techInsightsApi, catalogApi, githubASUtils]);
 
   return (
-    <Tooltip title={reason}>
-      <div>
-        <Box
-          my={1}
-          width={50}
-          height={50}
-          borderRadius="50%"
-          bgcolor={color}
-          onClick={onClick}
-          style={onClick ? { cursor: 'pointer' } : {}}
-        />
-      </div>
+    <Tooltip title={reason} placement="right">
+      <Box
+        my={1}
+        width={50}
+        height={50}
+        borderRadius="50%"
+        bgcolor={color}
+        onClick={onClick}
+        style={onClick ? { cursor: 'pointer' } : {}}
+      />
     </Tooltip>
   );
 };

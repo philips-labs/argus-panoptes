@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: identity-team
+  description: The Philips  Identity team
+spec:
+  type: team
+  profile:
+    displayName: Identity Team
+    email: identity_team@yourcompany.com
+  children: [] # List other sub-teams here if you want
+  members:
+    - identity-team-member
+    - both-teams-member

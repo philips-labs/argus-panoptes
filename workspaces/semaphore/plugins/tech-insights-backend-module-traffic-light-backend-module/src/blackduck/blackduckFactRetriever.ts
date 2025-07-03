@@ -45,9 +45,9 @@ type BD_VERISON_DETAIL = {
 };
 
 // Define the type for the Black Duck REST API response
-type BD_REST_API_RESPONSE = {
-  totalCount: Number;
-  items: [];
+type BD_REST_API_RESPONSE<T> = {
+  totalCount: number;
+  items: T[];
   appliedFilters: [];
   _meta: META;
 };
@@ -122,9 +122,10 @@ export const createBlackDuckFactRetriever = (config: Config): FactRetriever => {
 
           try {
             // Retrieve the project from Black Duck
+            const projectQuery = `name:${projectName}`;
             const projectRes = await fetch(
               `${host}/projects?limit=999&q=${encodeURIComponent(
-                `name:${projectName}`,
+                projectQuery,
               )}`,
               {
                 method: 'GET',
@@ -144,18 +145,12 @@ export const createBlackDuckFactRetriever = (config: Config): FactRetriever => {
 
             // Parse the project response
             const project =
-              (await projectRes.json()) as Promise<BD_REST_API_RESPONSE>;
-
-            // Initialize projectDetail and versionDetail variables
-            let projectDetail: BD_PROJECT_DETAIL | any;
-            let versionDetail: BD_VERISON_DETAIL | any;
+              (await projectRes.json()) as BD_REST_API_RESPONSE<BD_PROJECT_DETAIL>;
 
             // Find the project detail by name
-            (await project).items.forEach((item: any) => {
-              if (item.name === projectName) {
-                projectDetail = item;
-              }
-            });
+            const projectDetail = project.items.find(
+              item => item.name === projectName,
+            );
 
             // If projectDetail is not found, log an error
             if (projectDetail === undefined) {
@@ -163,12 +158,11 @@ export const createBlackDuckFactRetriever = (config: Config): FactRetriever => {
             }
 
             // Retrieve the project version from Black Duck
+            const versionQuery = `versionName:${projectVersion}`;
             const versionRes = await fetch(
               `${
                 projectDetail._meta.href
-              }/versions?limit=999&q=${encodeURIComponent(
-                `versionName:${projectVersion}`,
-              )}`,
+              }/versions?limit=999&q=${encodeURIComponent(versionQuery)}`,
               {
                 method: 'GET',
                 headers: {
@@ -186,16 +180,14 @@ export const createBlackDuckFactRetriever = (config: Config): FactRetriever => {
             }
 
             // Parse the version response
+            // Parse the version response with the correct generic type
             const version =
-              (await versionRes.json()) as Promise<BD_REST_API_RESPONSE>;
+              (await versionRes.json()) as BD_REST_API_RESPONSE<BD_VERISON_DETAIL>;
 
             // Find the version detail by version name
-            (await version).items.forEach((item: any) => {
-              if (item.versionName === projectVersion) {
-                versionDetail = item;
-              }
-            });
-
+            const versionDetail = version.items.find(
+              item => item.versionName === projectVersion,
+            );
             // If versionDetail is not found, log an error
             if (versionDetail === undefined) {
               return null;
@@ -223,22 +215,22 @@ export const createBlackDuckFactRetriever = (config: Config): FactRetriever => {
             // Extract security risk facts from the risk profile
             const facts = {
               security_risks_critical:
-                riskProfile?.categories.SECURITY.CRITICAL || 0,
-              security_risks_high: riskProfile?.categories.SECURITY.HIGH || 0,
+                riskProfile?.categories.SECURITY.CRITICAL ?? 0,
+              security_risks_high: riskProfile?.categories.SECURITY.HIGH ?? 0,
               security_risks_medium:
-                riskProfile?.categories.SECURITY.MEDIUM || 0,
+                riskProfile?.categories.SECURITY.MEDIUM ?? 0,
             };
 
             // Return the facts associated with this entity
             return {
               entity: {
                 name: entity.metadata.name,
-                namespace: entity.metadata.namespace || 'default',
+                namespace: entity.metadata.namespace ?? 'default',
                 kind: entity.kind,
               },
               facts,
             };
-          } catch (error) {
+          } catch {
             return null;
           }
         }),

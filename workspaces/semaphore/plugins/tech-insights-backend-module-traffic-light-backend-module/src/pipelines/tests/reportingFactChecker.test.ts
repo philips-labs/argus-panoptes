@@ -42,7 +42,7 @@ describe('Reporting Pipeline Checks Configuration', () => {
   // Test: check if all metrics are covered by the fact checkers
   test('checks cover expected metrics', () => {
     // Verify that important reporting pipeline metrics are covered
-    const expectedMetrics = ['overallSuccessRate'];
+    const expectedMetrics = ['successRate'];
 
     // Extract second factId (the actual metric being checked)
     const coveredMetrics = reportingPipelineChecks.map(
@@ -65,7 +65,7 @@ describe('Reporting Pipeline Checks Configuration', () => {
     expect(successRateCheck?.type).toBe('percentage');
     expect(successRateCheck?.factIds).toEqual([
       'reportingPipelineStatusFactRetriever',
-      'overallSuccessRate',
+      'successRate',
     ]);
     expect(successRateCheck?.name).toBe('Reporting Pipeline Success Rate');
     expect(successRateCheck?.description).toContain('pipeline success rate');

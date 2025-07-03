@@ -1,3 +1,7 @@
+/**
+ * Traffic Light Plugin Definition
+ * Plugin for visualizing system health through traffic light indicators
+ */
 import {
   createPlugin,
   createRoutableExtension,
@@ -5,6 +9,7 @@ import {
 
 import { rootRouteRef } from './routes';
 
+// Create the plugin instance with routing configuration
 export const trafficLightPlugin = createPlugin({
   id: 'traffic-light',
   routes: {
@@ -12,6 +17,7 @@ export const trafficLightPlugin = createPlugin({
   },
 });
 
+// Create the main dashboard page component with lazy loading
 export const TrafficLightPage = trafficLightPlugin.provide(
   createRoutableExtension({
     name: 'TrafficLightPage',

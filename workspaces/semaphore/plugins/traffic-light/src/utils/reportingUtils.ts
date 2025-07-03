@@ -42,8 +42,6 @@ const DEFAULT_CHECKS: ReportingPipelineChecks = {
  * evaluating Reporting‑pipeline data.
  */
 export class ReportingUtils {
-  // constructor() {}
-
   /**
    * Fetches Reporting pipeline facts for a given entity using the Tech Insights API.
    * Returns metrics like total workflow runs, unique workflows, success count, failure count, and success rate.
@@ -56,28 +54,27 @@ export class ReportingUtils {
     api: TechInsightsApi,
     entity: CompoundEntityRef,
   ): Promise<ReportingPipelineMetrics> {
-    try {
-      // Fetch Reporting pipeline facts for the given entity
-      const response = await api.getFacts(entity, [
-        'reportingPipelineStatusFactRetriever',
-      ]);
+    return api
+      .getFacts(entity, ['reportingPipelineStatusFactRetriever'])
+      .then(response => {
+        const facts = response?.reportingPipelineStatusFactRetriever?.facts;
 
-      const facts = response?.reportingPipelineStatusFactRetriever?.facts;
+        if (!facts) {
+          return { ...DEFAULT_METRICS };
+        }
 
-      if (!facts) {
+        return {
+          workflowMetrics: Object(facts.workflowMetrics ?? {}),
+          totalIncludedWorkflows: Number(facts.totalIncludedWorkflows ?? 0),
+          successfulRuns: Number(facts.successfulRuns ?? 0),
+          failedRuns: Number(facts.failedRuns ?? 0),
+          successRate: Number(facts.successRate ?? 0),
+        };
+      })
+      .catch(() => {
+        // Error fetching reporting pipeline facts
         return { ...DEFAULT_METRICS };
-      }
-
-      return {
-        workflowMetrics: Object(facts.workflowMetrics ?? {}),
-        totalIncludedWorkflows: Number(facts.totalIncludedWorkflows ?? 0),
-        successfulRuns: Number(facts.successfulRuns ?? 0),
-        failedRuns: Number(facts.failedRuns ?? 0),
-        successRate: Number(facts.successRate ?? 0),
-      };
-    } catch (error) {
-      return { ...DEFAULT_METRICS };
-    }
+      });
   }
 
   /**
@@ -92,23 +89,24 @@ export class ReportingUtils {
     api: TechInsightsApi,
     entity: CompoundEntityRef,
   ): Promise<ReportingPipelineChecks> {
-    try {
-      // Fetch Reporting pipeline checks for the given entity
-      const checkResults = await api.runChecks(entity);
+    return api
+      .runChecks(entity)
+      .then(checkResults => {
+        if (checkResults.length === 0) {
+          return { ...DEFAULT_CHECKS };
+        }
 
-      const successRateCheck = checkResults.find(
-        r => r.check.id === 'reporting-success-rate',
-      );
+        const successRateCheck = checkResults.find(
+          r => r.check.id === 'reporting-success-rate',
+        );
 
-      if (checkResults.length === 0) {
+        return {
+          successRateCheck: successRateCheck?.result === true,
+        };
+      })
+      .catch(() => {
+        // Error fetching reporting pipeline checks
         return { ...DEFAULT_CHECKS };
-      }
-
-      return {
-        successRateCheck: successRateCheck?.result === true,
-      };
-    } catch (error) {
-      return { ...DEFAULT_CHECKS };
-    }
+      });
   }
 }

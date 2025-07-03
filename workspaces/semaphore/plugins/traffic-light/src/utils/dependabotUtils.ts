@@ -1,8 +1,4 @@
-import {
-  CompoundEntityRef,
-  Entity,
-  getCompoundEntityRef,
-} from '@backstage/catalog-model';
+import { CompoundEntityRef } from '@backstage/catalog-model';
 import { TechInsightsApi } from '@backstage/plugin-tech-insights';
 
 export interface RepoAlertSummary {
@@ -29,69 +25,6 @@ export interface DependabotChecks {
  * methods for Dependabot facts & checks.
  */
 export class DependabotUtils {
-  // constructor() {}
-
-  async getTop5CriticalDependabotRepos(
-    techInsightsApi: TechInsightsApi,
-    entities: Entity[],
-  ): Promise<RepoAlertSummary[]> {
-    const results: RepoAlertSummary[] = [];
-
-    for (const entity of entities) {
-      const entityRef = getCompoundEntityRef(entity);
-      try {
-        const facts = await this.getDependabotFacts(techInsightsApi, entityRef);
-        results.push({
-          name: entity.metadata.name,
-          critical: typeof facts.critical === 'number' ? facts.critical : 0,
-          high: typeof facts.high === 'number' ? facts.high : 0,
-          medium: typeof facts.medium === 'number' ? facts.medium : 0,
-        });
-      } catch (err) {
-        // console.warn(
-        //   `⚠️ Could not fetch dependabot fact for ${entityRef.name}`,
-        //   err,
-        // );
-        results.push({
-          name: entity.metadata.name,
-          critical: 0,
-          high: 0,
-          medium: 0,
-        });
-      }
-    }
-
-    const selected: RepoAlertSummary[] = [];
-
-    const criticalRepos = results
-      .filter(r => r.critical > 0)
-      .sort((a, b) => b.critical - a.critical);
-    selected.push(...criticalRepos.slice(0, 5));
-
-    if (selected.length < 5) {
-      const highRepos = results
-        .filter(r => !selected.includes(r) && r.high > 0)
-        .sort((a, b) => b.high - a.high);
-      selected.push(...highRepos.slice(0, 5 - selected.length));
-    }
-
-    if (selected.length < 5) {
-      const mediumRepos = results
-        .filter(r => !selected.includes(r) && r.medium > 0)
-        .sort((a, b) => b.medium - a.medium);
-      selected.push(...mediumRepos.slice(0, 5 - selected.length));
-    }
-
-    if (selected.length < 5) {
-      const fallback = results
-        .filter(r => !selected.includes(r))
-        .slice(0, 5 - selected.length);
-      selected.push(...fallback);
-    }
-
-    return selected;
-  }
-
   /**
    * Fetches Dependabot facts for a given entity using the Tech Insights API.
    * Returns metrics like total alert counts per severity.
@@ -113,7 +46,7 @@ export class DependabotUtils {
         high: Number(facts.high ?? 0),
         medium: Number(facts.medium ?? 0),
       };
-    } catch (error) {
+    } catch {
       return { critical: 0, high: 0, medium: 0 };
     }
   }
@@ -151,7 +84,7 @@ export class DependabotUtils {
         highAlertCheck: highCheck?.result === true,
         mediumAlertCheck: mediumCheck?.result === true,
       };
-    } catch (error) {
+    } catch {
       return {
         criticalAlertCheck: false,
         highAlertCheck: false,

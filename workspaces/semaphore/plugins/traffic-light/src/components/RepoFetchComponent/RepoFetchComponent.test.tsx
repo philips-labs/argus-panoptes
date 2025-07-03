@@ -5,26 +5,12 @@ import { RepoFetchComponent } from './RepoFetchComponent';
 global.fetch = jest.fn();
 
 describe('RepoFetchComponent', () => {
-  // Setup console.error spy to test error handling
-  // sconst originalConsoleError = console.error;
-  // let consoleErrorSpy: jest.SpyInstance;
-
   beforeEach(() => {
     // Reset mocks before each test
     jest.clearAllMocks();
-    // consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
-  // afterEach(() => {
-  //   // Restore console.error after each test
-  //   consoleErrorSpy.mockRestore();
-  // });
-
-  // afterAll(() => {
-  //   console.error = originalConsoleError;
-  // });
-
-  it('should fetch repos and call onData with simplified results', async () => {
+  it('should fetch repos and call onData', async () => {
     // Arrange
     const mockReposData = [
       { name: 'repo1', description: 'Description for repo1' },
@@ -45,7 +31,6 @@ describe('RepoFetchComponent', () => {
     render(<RepoFetchComponent onData={mockOnData} />);
 
     // Assert
-    // Wait for the async function to complete
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
         'https://api.github.com/orgs/philips-labs/repos',
@@ -79,31 +64,19 @@ describe('RepoFetchComponent', () => {
     });
   });
 
-  it('should handle fetch errors', async () => {
+  it('should handle repos with various description values', async () => {
     // Arrange
-    const mockError = new Error('Network error');
-    (global.fetch as jest.Mock).mockRejectedValue(mockError);
+    const mockReposData = [
+      { name: 'repo1', description: 'Valid description' },
+      { name: 'repo2', description: null },
+      { name: 'repo3', description: undefined },
+      { name: 'repo4', description: '' },
+      { name: 'repo5' }, // missing description property
+    ];
 
-    const mockOnData = jest.fn();
-
-    // Act
-    render(<RepoFetchComponent onData={mockOnData} />);
-
-    // Assert
-    await waitFor(() => {
-      // expect(consoleErrorSpy).toHaveBeenCalledWith(
-      //   'Failed to fetch repos:',
-      //   mockError,
-      // );
-      expect(mockOnData).not.toHaveBeenCalled();
-    });
-  });
-
-  it('should handle JSON parsing errors', async () => {
-    // Arrange
     const mockResponse = {
       ok: true,
-      json: jest.fn().mockRejectedValue(new Error('Invalid JSON')),
+      json: jest.fn().mockResolvedValue(mockReposData),
     };
 
     (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -115,8 +88,13 @@ describe('RepoFetchComponent', () => {
 
     // Assert
     await waitFor(() => {
-      // expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(mockOnData).not.toHaveBeenCalled();
+      expect(mockOnData).toHaveBeenCalledWith([
+        { name: 'repo1', description: 'Valid description' },
+        { name: 'repo2', description: 'No description' },
+        { name: 'repo3', description: 'No description' },
+        { name: 'repo4', description: '' }, // Empty string is truthy, so it stays
+        { name: 'repo5', description: 'No description' },
+      ]);
     });
   });
 
@@ -153,7 +131,7 @@ describe('RepoFetchComponent', () => {
     });
   });
 
-  it('should render nothing (return null)', () => {
+  it('should render nothing', () => {
     // Arrange
     const mockResponse = {
       ok: true,

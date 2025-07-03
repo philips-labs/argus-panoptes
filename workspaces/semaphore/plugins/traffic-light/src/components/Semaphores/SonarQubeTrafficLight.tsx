@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
 import { Entity } from '@backstage/catalog-model';
 import { useApi } from '@backstage/core-plugin-api';
 import { techInsightsApiRef } from '@backstage/plugin-tech-insights';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { SonarCloudUtils } from '../../utils/sonarCloudUtils';
 import { BaseTrafficLight } from './BaseTrafficLight';
-
+import { useState, useMemo, useEffect } from 'react';
 /**
  * The component fetches SonarQube quality gate status for each provided entity using the Tech Insights API,
  * aggregates the results, and determines the appropriate traffic light color:
@@ -52,19 +51,20 @@ export const determineSonarQubeColor = async (
   const systemEntity = await catalogApi.getEntityByRef({
     kind: 'system',
     namespace: 'default',
-    name: typeof systemName === 'string' ? systemName : String(systemName),
+    name:
+      typeof systemName === 'string' ? systemName : JSON.stringify(systemName),
   });
 
   // Get thresholds for traffic light colour from system annotations
   const redThreshold = parseFloat(
     systemEntity?.metadata.annotations?.[
       'tech-insights.io/sonarcloud-quality-gate-red-threshold-percentage'
-    ] || '50',
+    ] ?? '50',
   );
   const yellowThreshold = parseFloat(
     systemEntity?.metadata.annotations?.[
       'tech-insights.io/sonarcloud-quality-gate-yellow-threshold-percentage'
-    ] || '25',
+    ] ?? '25',
   );
 
   try {
@@ -72,7 +72,7 @@ export const determineSonarQubeColor = async (
       enabledEntities.map(entity =>
         sonarUtils.getSonarQubeFacts(techInsightsApi, {
           kind: entity.kind,
-          namespace: entity.metadata.namespace || 'default',
+          namespace: entity.metadata.namespace ?? 'default',
           name: entity.metadata.name,
         }),
       ),
@@ -107,7 +107,7 @@ export const determineSonarQubeColor = async (
       color: 'green',
       reason: `${totalFailedQualityGate} entities failed the quality gate check`,
     };
-  } catch (err) {
+  } catch {
     return { color: 'gray', reason: 'Error fetching SonarQube data' };
   }
 };
@@ -126,7 +126,6 @@ export const SonarQubeTrafficLight = ({
   onClick,
 }: {
   entities: Entity[];
-  system?: string | undefined;
   onClick?: () => void;
 }) => {
   const [color, setColor] = useState<'green' | 'red' | 'yellow' | 'gray'>(
@@ -151,7 +150,7 @@ export const SonarQubeTrafficLight = ({
     };
 
     fetchData();
-  }, [entities, techInsightsApi, catalogApi, sonarUtils, setColor, setReason]);
+  }, [entities, techInsightsApi, catalogApi, sonarUtils]);
 
   return <BaseTrafficLight color={color} tooltip={reason} onClick={onClick} />;
 };

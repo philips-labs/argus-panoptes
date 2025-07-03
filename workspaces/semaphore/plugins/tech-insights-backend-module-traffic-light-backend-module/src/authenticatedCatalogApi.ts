@@ -3,23 +3,33 @@ import {
   GetEntitiesRequest,
   GetEntitiesResponse,
   GetEntitiesByRefsRequest,
+  GetEntitiesByRefsResponse,
   GetEntityAncestorsRequest,
+  GetEntityAncestorsResponse,
   CatalogRequestOptions,
   AddLocationRequest,
   AddLocationResponse,
   GetEntityFacetsRequest,
   GetEntityFacetsResponse,
+  GetLocationsResponse,
   Location,
   ValidateEntityResponse,
+  QueryEntitiesRequest,
+  QueryEntitiesResponse,
 } from '@backstage/catalog-client';
 import { CompoundEntityRef, Entity } from '@backstage/catalog-model';
 
+/**
+ * Decorator that wraps a CatalogApi and injects authentication token
+ * into all requests automatically
+ */
 export class AuthenticatedCatalogApi implements CatalogApi {
   constructor(
     private readonly catalogApi: CatalogApi,
     private readonly token: string,
   ) {}
 
+  // Entity removal operations
   async removeEntityByUid(
     uid: string,
     options?: CatalogRequestOptions,
@@ -30,6 +40,7 @@ export class AuthenticatedCatalogApi implements CatalogApi {
     });
   }
 
+  // Entity refresh operations
   async refreshEntity(
     entityRef: string,
     options?: CatalogRequestOptions,
@@ -40,6 +51,7 @@ export class AuthenticatedCatalogApi implements CatalogApi {
     });
   }
 
+  // Entity facet operations
   async getEntityFacets(
     request: GetEntityFacetsRequest,
     options?: CatalogRequestOptions,
@@ -50,6 +62,7 @@ export class AuthenticatedCatalogApi implements CatalogApi {
     });
   }
 
+  // Location management operations
   async addLocation(
     location: AddLocationRequest,
     options?: CatalogRequestOptions,
@@ -70,6 +83,7 @@ export class AuthenticatedCatalogApi implements CatalogApi {
     });
   }
 
+  // Location retrieval operations
   async getLocationByEntity(
     entityRef: string | CompoundEntityRef,
     options?: CatalogRequestOptions,
@@ -80,6 +94,7 @@ export class AuthenticatedCatalogApi implements CatalogApi {
     });
   }
 
+  // Validation operations
   async validateEntity(
     entity: Entity,
     locationRef: string,
@@ -91,52 +106,86 @@ export class AuthenticatedCatalogApi implements CatalogApi {
     });
   }
 
-  async getEntityByRef(ref: string): Promise<Entity | undefined> {
-    return this.catalogApi.getEntityByRef(ref, { token: this.token });
+  // Entity retrieval operations
+  async getEntityByRef(
+    ref: string,
+    options?: CatalogRequestOptions,
+  ): Promise<Entity | undefined> {
+    return this.catalogApi.getEntityByRef(ref, {
+      ...options,
+      token: this.token,
+    });
   }
 
   async getEntities(
     request?: GetEntitiesRequest,
+    options?: CatalogRequestOptions,
   ): Promise<GetEntitiesResponse> {
-    return this.catalogApi.getEntities(request, { token: this.token });
+    return this.catalogApi.getEntities(request, {
+      ...options,
+      token: this.token,
+    });
   }
 
   async getEntitiesByRefs(
     request: GetEntitiesByRefsRequest,
     options?: CatalogRequestOptions,
-  ) {
+  ): Promise<GetEntitiesByRefsResponse> {
     return this.catalogApi.getEntitiesByRefs(request, {
       ...options,
       token: this.token,
     });
   }
 
-  async queryEntities(request?: GetEntitiesRequest) {
-    return this.catalogApi.queryEntities(request, { token: this.token });
+  async queryEntities(
+    request?: QueryEntitiesRequest,
+    options?: CatalogRequestOptions,
+  ): Promise<QueryEntitiesResponse> {
+    return this.catalogApi.queryEntities(request, {
+      ...options,
+      token: this.token,
+    });
   }
 
+  // Relationship operations
   async getEntityAncestors(
     request: GetEntityAncestorsRequest,
     options?: CatalogRequestOptions,
-  ) {
+  ): Promise<GetEntityAncestorsResponse> {
     return this.catalogApi.getEntityAncestors(request, {
       ...options,
       token: this.token,
     });
   }
 
-  async getLocationById(locationId: string) {
-    return this.catalogApi.getLocationById(locationId, { token: this.token });
+  // Additional location operations
+  async getLocationById(
+    locationId: string,
+    options?: CatalogRequestOptions,
+  ): Promise<Location | undefined> {
+    return this.catalogApi.getLocationById(locationId, {
+      ...options,
+      token: this.token,
+    });
   }
 
-  async getLocationByRef(locationRef: string) {
-    return this.catalogApi.getLocationByRef(locationRef, { token: this.token });
+  async getLocationByRef(
+    locationRef: string,
+    options?: CatalogRequestOptions,
+  ): Promise<Location | undefined> {
+    return this.catalogApi.getLocationByRef(locationRef, {
+      ...options,
+      token: this.token,
+    });
   }
 
-  getLocations: CatalogApi['getLocations'] = async (request, options) => {
+  async getLocations(
+    request?: {},
+    options?: CatalogRequestOptions,
+  ): Promise<GetLocationsResponse> {
     return this.catalogApi.getLocations(request, {
       ...options,
       token: this.token,
     });
-  };
+  }
 }

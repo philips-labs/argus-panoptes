@@ -1,8 +1,20 @@
+/**
+ * Traffic Light Components
+ * Barrel file exporting all traffic light semaphore components
+ */
+
+// Security health indicators
 export * from './TrafficLightDependabot';
 export * from './GitHubSecurityTrafficLight';
+export * from './BlackDuckTrafficLight';
+
+// Code quality indicators
 export * from './SonarQubeTrafficLight';
+export * from './AzureDevOpsBugsTrafficLight';
+
+// Pipeline health indicators
 export * from './PreproductionTrafficLight';
 export * from './FoundationTrafficLight';
-export * from './AzureDevOpsBugsTrafficLight';
-export * from './BlackDuckTrafficLight';
+
+// Base component
 export * from './BaseTrafficLight';

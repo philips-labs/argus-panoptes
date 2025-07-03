@@ -51,8 +51,6 @@ const DEFAULT_CHECKS: PreproductionPipelineChecks = {
  * `githubPipelineStatusFactRetriever` retriever.
  */
 export class PreproductionUtils {
-  // constructor() {}
-
   /**
    * Fetches Pre-production pipeline facts for a given entity using the Tech Insights API.
    * Returns the following metrics: total workflow runs count, unique workflows, success count, failure count, and success metrics.
@@ -87,7 +85,7 @@ export class PreproductionUtils {
         failureWorkflowRunsCount: Number(facts.failureWorkflowRunsCount ?? 0),
         successRate: Number(facts.successRate ?? 0),
       };
-    } catch (error) {
+    } catch {
       // Return default values if an error occurs
       return { ...DEFAULT_METRICS };
     }
@@ -123,7 +121,7 @@ export class PreproductionUtils {
       return {
         successRateCheck: successRateCheck?.result === true,
       };
-    } catch (error) {
+    } catch {
       // Return default values if an error occurs
       return { ...DEFAULT_CHECKS };
     }

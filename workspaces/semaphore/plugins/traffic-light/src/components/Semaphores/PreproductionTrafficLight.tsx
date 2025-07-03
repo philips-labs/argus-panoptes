@@ -40,7 +40,7 @@ export const PreproductionTrafficLight = ({
 
         try {
           const systemName = entities[0].spec?.system;
-          const namespace = entities[0].metadata.namespace || 'default';
+          const namespace = entities[0].metadata.namespace ?? 'default';
 
           if (systemName) {
             const systemEntity = await catalogApi.getEntityByRef({
@@ -72,8 +72,8 @@ export const PreproductionTrafficLight = ({
                 .filter(name => name.length > 0);
             }
           }
-        } catch (err) {
-          // Could not fetch system configuration; using defaults.
+        } catch {
+          // If system entity can't be fetched, proceed with default values.
         }
 
         // 2. Filter entities to only include configured repositories
@@ -97,7 +97,7 @@ export const PreproductionTrafficLight = ({
           filteredEntities.map(entity =>
             preproductionUtils.getPreproductionPipelineChecks(techInsightsApi, {
               kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
+              namespace: entity.metadata.namespace ?? 'default',
               name: entity.metadata.name,
             }),
           ),
@@ -117,7 +117,7 @@ export const PreproductionTrafficLight = ({
 
         setColor(computedColor);
         setReason(computedReason);
-      } catch (err) {
+      } catch {
         setColor('gray');
         setReason('Error fetching preproduction pipeline data');
       }

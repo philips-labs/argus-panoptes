@@ -62,11 +62,9 @@ techdocs:
     type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
 
 auth:
-  # see https://backstage.io/docs/auth/ to learn about auth providers
   providers:
-    # See https://backstage.io/docs/auth/guest/provider
-    guest: {}
-
+    guest:
+      userEntityRef: user:development/both-teams-member
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
 
@@ -75,7 +73,7 @@ catalog:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow: [Component, System, API, Resource, Location, Group, User]
   locations:
     # Systems
     - type: file
@@ -84,6 +82,14 @@ catalog:
     # Components
     - type: file
       target: ../../examples/*components/*.yaml
+
+    #Groups
+    - type: file
+      target: ../../examples/groups/*.yaml
+
+    # Users
+    - type: file
+      target: ../../examples/users/*.yaml
 
     ## Uncomment these lines to add more example data
     # - type: url

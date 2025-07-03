@@ -1,4 +1,3 @@
-import { FC, useState, useMemo, useEffect } from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
@@ -9,6 +8,7 @@ import { BlackDuckUtils } from '../../utils/blackDuckUtils';
 import { SemaphoreData, IssueDetail } from './types';
 import { Entity } from '@backstage/catalog-model';
 import { determineBlackDuckColor } from '../Semaphores/BlackDuckTrafficLight';
+import { useEffect, useMemo, useState } from 'react';
 
 const useStyles = makeStyles(theme => ({
   metricBox: {
@@ -32,11 +32,9 @@ interface BlackDuckSemaphoreDialogProps {
   entities?: Entity[];
 }
 
-export const BlackDuckSemaphoreDialog: FC<BlackDuckSemaphoreDialogProps> = ({
-  open,
-  onClose,
-  entities = [],
-}) => {
+export const BlackDuckSemaphoreDialog: React.FC<
+  BlackDuckSemaphoreDialogProps
+> = ({ open, onClose, entities = [] }) => {
   const classes = useStyles();
   const techInsightsApi = useApi(techInsightsApiRef);
   const catalogApi = useApi(catalogApiRef);
@@ -78,7 +76,7 @@ export const BlackDuckSemaphoreDialog: FC<BlackDuckSemaphoreDialogProps> = ({
           enabledEntities.map(entity =>
             blackDuckUtils.getBlackDuckFacts(techInsightsApi, {
               kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
+              namespace: entity.metadata.namespace ?? 'default',
               name: entity.metadata.name,
             }),
           ),
@@ -110,7 +108,7 @@ export const BlackDuckSemaphoreDialog: FC<BlackDuckSemaphoreDialogProps> = ({
 
         for (const repo of displayedRepos) {
           // Create a description and determine severity based on the repo's issues
-          let description = ``;
+          let description;
           let severity = '';
 
           if (repo.security_risks_critical > 0) {
@@ -141,8 +139,8 @@ export const BlackDuckSemaphoreDialog: FC<BlackDuckSemaphoreDialogProps> = ({
           techInsightsApi,
           blackDuckUtils,
         );
-        let color: 'green' | 'red' | 'yellow' | 'gray' = 'green';
-        color = trafficLightcolor.color;
+        const color: 'green' | 'red' | 'yellow' | 'gray' =
+          trafficLightcolor.color;
 
         // Create the summary
         let summary = 'No critical security risks were found.';
@@ -154,7 +152,7 @@ export const BlackDuckSemaphoreDialog: FC<BlackDuckSemaphoreDialogProps> = ({
 
         // Set the real data
         setData({ color, metrics: totals, summary, details });
-      } catch (err) {
+      } catch {
         // Set default data in case of error
         setData({
           color: 'gray',

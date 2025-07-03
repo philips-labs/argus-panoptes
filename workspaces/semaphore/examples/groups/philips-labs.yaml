@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: philips-labs
+  namespace: default
+  description: The Philips Labs engineering team
+spec:
+  type: team
+  profile:
+    displayName: Philips Labs
+    email: philips-labs@yourcompany.com
+  children: [] # List other sub-teams here if you want

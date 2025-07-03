@@ -1,4 +1,3 @@
-import { FC, useMemo, useState, useEffect } from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
@@ -9,6 +8,7 @@ import { SonarCloudUtils } from '../../utils/sonarCloudUtils';
 import { SemaphoreData, IssueDetail } from './types';
 import { Entity } from '@backstage/catalog-model';
 import { determineSonarQubeColor } from '../Semaphores/SonarQubeTrafficLight';
+import { useEffect, useMemo, useState } from 'react';
 
 const useStyles = makeStyles(theme => ({
   metricBox: {
@@ -32,7 +32,7 @@ interface SonarSemaphoreDialogProps {
   entities?: Entity[];
 }
 
-export const SonarQubeSemaphoreDialog: FC<SonarSemaphoreDialogProps> = ({
+export const SonarQubeSemaphoreDialog: React.FC<SonarSemaphoreDialogProps> = ({
   open,
   onClose,
   entities = [],
@@ -76,7 +76,7 @@ export const SonarQubeSemaphoreDialog: FC<SonarSemaphoreDialogProps> = ({
           enabledEntities.map(entity =>
             sonarUtils.getSonarQubeFacts(techInsightsApi, {
               kind: entity.kind,
-              namespace: entity.metadata.namespace || 'default',
+              namespace: entity.metadata.namespace ?? 'default',
               name: entity.metadata.name,
             }),
           ),
@@ -159,8 +159,8 @@ export const SonarQubeSemaphoreDialog: FC<SonarSemaphoreDialogProps> = ({
           techInsightsApi,
           sonarUtils,
         );
-        let color: 'green' | 'red' | 'yellow' | 'gray' = 'green';
-        color = trafficLightcolor.color;
+        const color: 'green' | 'red' | 'yellow' | 'gray' =
+          trafficLightcolor.color;
 
         // Create the summary
         let summary = 'No critical code quality issues were found.';
@@ -173,12 +173,27 @@ export const SonarQubeSemaphoreDialog: FC<SonarSemaphoreDialogProps> = ({
         // Set the real data
         setData({ color, metrics: totals, summary, details });
       } catch (err) {
-        // Set default data in case of error
+        // Report to error tracking service (if available)
+        // errorReporter?.captureException(err);
+
+        // Provide meaningful user feedback based on error type
+        const errorMessage =
+          err instanceof Error
+            ? `Failed to load SonarQube data: ${err.message}`
+            : 'Failed to load SonarQube data due to an unknown error.';
+
         setData({
           color: 'gray',
           metrics: {},
-          summary: 'Failed to load SonarQube data.',
-          details: [],
+          summary: errorMessage,
+          details: [
+            {
+              severity: 'critical',
+              description:
+                'Unable to retrieve code quality metrics. Please try again later.',
+              url: '',
+            },
+          ],
         });
       } finally {
         setIsLoading(false);

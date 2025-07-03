@@ -124,7 +124,7 @@ describe('DynamicThresholdFactChecker', () => {
       );
     });
 
-    // TestL error is thrown when system name is not specified
+    // Test: error is thrown when system name is not specified
     test('throws error when component does not specify a system', async () => {
       const entityWithoutSystem = {
         ...testComponentEntity,
@@ -133,7 +133,7 @@ describe('DynamicThresholdFactChecker', () => {
       mockCatalogApi.getEntityByRef.mockResolvedValueOnce(entityWithoutSystem);
 
       await expect(factChecker.runChecks(testEntityRef)).rejects.toThrow(
-        `Component test-component does not specify a system.`,
+        `The 'spec.system' field for entity '${testEntityRef}' is missing, empty, or not a string.`,
       );
     });
 
@@ -555,7 +555,7 @@ describe('DynamicThresholdFactChecker', () => {
       });
 
       // Test: equal operator returns true when string value is equal to the threshold
-      test('evaluates equal operator correctly with strings', async () => {
+      test('evaluates equal operator correctly with strings when values match', async () => {
         mockRepository.getLatestFactsByIds.mockResolvedValueOnce({
           'test-fact-retriever': {
             id: 'test-fact-retriever',
@@ -582,7 +582,7 @@ describe('DynamicThresholdFactChecker', () => {
       });
 
       // Test: equal operator returns false when string value is not equal to the threshold
-      test('equal operator correctly with strings evaluation', async () => {
+      test('evaluates equal operator correctly with strings when values do not match', async () => {
         mockRepository.getLatestFactsByIds.mockResolvedValueOnce({
           'test-fact-retriever': {
             id: 'test-fact-retriever',
@@ -609,7 +609,7 @@ describe('DynamicThresholdFactChecker', () => {
       });
 
       // Test: notEqual operator returns true when string value is not equal to the threshold
-      test('notEqual operator correctly with strings evaluation', async () => {
+      test('evaluates notEqual operator correctly with strings when values are different', async () => {
         const systemEntityWithNotEqualOp = {
           ...systemEntityWithStringThreshold,
           metadata: {
@@ -649,7 +649,7 @@ describe('DynamicThresholdFactChecker', () => {
       });
 
       // Test: notEqual operator returns false when string value is equal to the threshold
-      test('checks notEqual operator correctly with strings', async () => {
+      test('evaluates notEqual operator correctly with strings when values are the same', async () => {
         const systemEntityWithNotEqualOp = {
           ...systemEntityWithStringThreshold,
           metadata: {
