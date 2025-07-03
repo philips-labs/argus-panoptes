@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: argus-panoptes
+  description: This is our test repo.
+  annotations:
+    github.com/project-slug: philips-labs/argus-panoptes
+    backstage.io/source-location: url:https://github.com/philips-labs/argus-panoptes
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_2
+    azure.com/bugs-query-id: b2fdb928-a73e-4cba-82c9-e605a194666d
+    reporting/workflows: '["CodeQL", "Dependabot Updates"]'
+    reporting/target-branch: main
+  tags:
+    - critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: philips-labs
+  system: ai-system

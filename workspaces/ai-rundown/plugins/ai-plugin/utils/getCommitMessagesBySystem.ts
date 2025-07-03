@@ -3,6 +3,20 @@ import { CompoundEntityRef } from '@backstage/catalog-model';
 import { CommitsPerRepo } from './types';
 
 /**
+ * Checks if a given ISO timestamp is from today.
+ */
+function isToday(timestamp: string): boolean {
+  const factDate = new Date(timestamp);
+  const today = new Date();
+
+  return (
+    factDate.getFullYear() === today.getFullYear() &&
+    factDate.getMonth() === today.getMonth() &&
+    factDate.getDate() === today.getDate()
+  );
+}
+
+/**
  * Receives a record of all compound entity refs of a certain system,
  * finds the commit messages for these refs and returns a dictionary
  * with system as the key and an CommitPerRepo list as the value.
@@ -37,40 +51,39 @@ export async function getCommitMessagesBySystem(
        * Uses the techInsightsApi to retrieve the data saved under
        * id github-commit-message-retriever.
        */
-      try {
-        const facts = await techInsightsApi.getFacts(entityRef, [
-          'github-commit-message-retriever',
-        ]);
+      const facts = await techInsightsApi.getFacts(entityRef, [
+        'github-commit-message-retriever',
+      ]);
 
-        /**
-         * If no facts are stored on a certain entity ref
-         * then no further action is needed and the program breaks.
-         */
-        if (!facts) break;
+      /**
+       * If no facts are stored on a certain entity ref
+       * then no further action is needed and the program breaks.
+       */
+      if (!facts) break;
 
-        /**
-         * The JSON object retrieve is unpacked so that the recent
-         * commit messages can be extracted.
-         */
-        const retriever = facts['github-commit-message-retriever'];
-        const factsForEntity = retriever?.facts;
-        const recentCommitMessages = factsForEntity?.recent_commit_messages;
+      /**
+       * The JSON object retrieve is unpacked so that the recent
+       * commit messages can be extracted.
+       */
+      const retriever = facts['github-commit-message-retriever'];
+      const factsForEntity = retriever?.facts;
+      const recentCommitMessages = factsForEntity?.recent_commit_messages;
+      const timestamp = retriever?.timestamp;
 
-        /**
-         * If the recent commit messages are not undefines, the allCommitMessages
-         * list is being populated with a new object of the type
-         * CommitsPerRepo.
-         */
-        if (typeof recentCommitMessages === 'string') {
-          allCommitMessages.push({
-            repoName: entityRef.name,
-            commitMessages: recentCommitMessages,
-          });
-        } else {
-          // console.debug(`No commit messages found for ${entityRef.name}`);
-        }
-      } catch (error) {
-        // console.error(`Failed to retrieve facts for ${entityRef.name}:`, error);
+      /**
+       * If the recent commit messages are not undefines, the allCommitMessages
+       * list is being populated with a new object of the type
+       * CommitsPerRepo.
+       */
+      if (
+        typeof recentCommitMessages === 'string' &&
+        timestamp &&
+        isToday(timestamp)
+      ) {
+        allCommitMessages.push({
+          repoName: entityRef.name,
+          commitMessages: recentCommitMessages,
+        });
       }
     }
 

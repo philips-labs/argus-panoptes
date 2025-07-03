@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: finance-team
+  description: The Philips Finance team
+spec:
+  type: team
+  profile:
+    displayName: Finance Team
+    email: finance_team@yourcompany.com
+  children: [] # List other sub-teams here if you want
+  members:
+    - finance-team-member
+    - both-teams-member

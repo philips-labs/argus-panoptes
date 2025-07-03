@@ -1,21 +1,19 @@
 import express from 'express';
-import { LoggerService } from '@backstage/backend-plugin-api';
-import { PluginDatabaseManager } from '@backstage/backend-common';
+import { LoggerService, DatabaseService } from '@backstage/backend-plugin-api';
 import { AISummaryStore } from './utils/aiSummaryStore';
+import { SummaryPerRepo } from '@philips-labs/plugin-ai-plugin';
+import { Config } from '@backstage/config';
 
 interface RouterOptions {
   logger: LoggerService;
-  database: PluginDatabaseManager;
-}
-
-export interface SummaryPerRepo {
-  repoName: string;
-  summary: string;
+  database: DatabaseService;
+  config: Config;
 }
 
 export async function createRouter({
   logger,
   database,
+  config,
 }: RouterOptions): Promise<express.Router> {
   const router = express.Router();
   router.use(express.json());
@@ -33,12 +31,16 @@ export async function createRouter({
         .status(400)
         .json({ error: 'Missing required "date" query param' });
     }
+
     try {
       const summaries = await store.getAllSummariesForDate(requestedDate);
-      return res.json(summaries); // Add return here
+      return res.json(summaries);
     } catch (error) {
-      logger.error('Error fetching summaries:');
-      return res.status(500).json({ error: 'Could not fetch summaries' }); // Add return here
+      logger.error(
+        'Error fetching summaries:',
+        error instanceof Error ? error : { error: String(error) },
+      );
+      return res.status(500).json({ error: 'Could not fetch summaries' });
     }
   });
 
@@ -46,24 +48,73 @@ export async function createRouter({
    * POST /summaries - receive and store summaries
    * Expected format:
    * {
-   * system: "foo",
-   * date: "2025-05-13",
-   * summaries: [{ repoName: "repo-a", summary: "..." }, ...]
+   *   system: "foo",
+   *   date: "2025-05-13",
+   *   summaries: [{ repoName: "repo-a", summary: "..." }, ...]
    * }
    */
-  router.post('/summaries', async (req, res) => {
+  router.post('/summaries', async (req, res): Promise<void> => {
     try {
-      console.log('Received POST body:', req.body);
       const { system, date, summaries } = req.body;
       if (!system || !date || !Array.isArray(summaries)) {
-        return res.status(400).json({ error: 'Invalid request format' });
+        res.status(400).json({ error: 'Invalid request format' });
+        return;
       }
       await store.saveSummaries(system, date, summaries as SummaryPerRepo[]);
-      return res.status(204).send(); // Add return here
+      res.status(204).send();
     } catch (error) {
-      logger.error('Error saving summaries:');
-      return res.status(500).json({ error: 'Could not save summaries' }); // Add return here
+      logger.error(
+        'Error saving summaries:',
+        error instanceof Error ? error : { error: String(error) },
+      );
+      res.status(500).json({ error: 'Could not save summaries' });
     }
   });
+
+  router.post('/generate', async (req, res) => {
+    const prompt = req.body.prompt;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Missing prompt' });
+    }
+
+    const geminiToken = config
+      .getOptionalConfigArray('integrations.gemini')?.[0]
+      ?.getOptionalString('token');
+    if (!geminiToken) {
+      return res.status(500).json({ error: 'Gemini token not configured' });
+    }
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiToken}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: prompt }],
+              },
+            ],
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Gemini error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      const result = await response.json();
+      return res.json(result);
+    } catch (err) {
+      console.error('Error contacting Gemini:', err);
+      return res.status(500).json({ error: 'Failed to generate summary' }); // Added return here
+    }
+  });
+
   return router;
 }

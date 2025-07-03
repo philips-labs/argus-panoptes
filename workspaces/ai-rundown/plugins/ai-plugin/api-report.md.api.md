@@ -23,16 +23,6 @@ export const aiPluginPlugin: BackstagePlugin<
   {}
 >;
 
-// Warning: (ae-missing-release-tag) "CommitsPerRepo" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface CommitsPerRepo {
-  // (undocumented)
-  commitMessages: string;
-  // (undocumented)
-  repoName: string;
-}
-
 // Warning: (ae-missing-release-tag) "SummaryPerRepo" is part of the package's API, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -47,12 +37,9 @@ export interface SummaryPerRepo {
 //
 // src/plugin.d.ts:2:22 - (ae-undocumented) Missing documentation for "aiPluginPlugin".
 // src/plugin.d.ts:5:22 - (ae-undocumented) Missing documentation for "AiPluginPage".
-// src/utils/types.d.ts:1:1 - (ae-undocumented) Missing documentation for "CommitsPerRepo".
-// src/utils/types.d.ts:2:5 - (ae-undocumented) Missing documentation for "repoName".
-// src/utils/types.d.ts:3:5 - (ae-undocumented) Missing documentation for "commitMessages".
-// src/utils/types.d.ts:5:1 - (ae-undocumented) Missing documentation for "SummaryPerRepo".
-// src/utils/types.d.ts:6:5 - (ae-undocumented) Missing documentation for "repoName".
-// src/utils/types.d.ts:7:5 - (ae-undocumented) Missing documentation for "summary".
+// utils/types.d.ts:5:1 - (ae-undocumented) Missing documentation for "SummaryPerRepo".
+// utils/types.d.ts:6:5 - (ae-undocumented) Missing documentation for "repoName".
+// utils/types.d.ts:7:5 - (ae-undocumented) Missing documentation for "summary".
 
 // (No @packageDocumentation comment for this package)
 ```

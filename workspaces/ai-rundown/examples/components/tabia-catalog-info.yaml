@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tabia
+  description: Gives insights on the characteristics of our code bases.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/tabia
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/tabia
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_tabia
+    sonarcloud.io/enabled: 'true'
+    reporting/workflows: '["CodeQL"]'
+    reporting/target-branch: develop
+    preproduction/exclude: '["Dependabot.*"]'
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_3
+    azure.com/bugs-query-id: 80418d71-f25d-4316-9bca-427795de35e8
+  tags:
+    - non-critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: user-management-system

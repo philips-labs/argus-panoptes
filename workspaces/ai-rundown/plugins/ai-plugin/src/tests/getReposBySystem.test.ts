@@ -1,4 +1,4 @@
-import { getReposBySystem } from './getReposBySystem';
+import { getReposBySystem } from '../../utils/getReposBySystem';
 import { Entity } from '@backstage/catalog-model';
 
 describe('getReposBySystem', () => {

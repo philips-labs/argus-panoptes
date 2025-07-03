@@ -1,2 +1,3 @@
 export { aiPluginPlugin, AiPluginPage } from './plugin';
-export * from './utils/types';
+
+export type { SummaryPerRepo } from '../utils/types';

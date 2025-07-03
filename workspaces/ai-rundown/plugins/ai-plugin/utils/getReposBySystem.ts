@@ -25,7 +25,7 @@ export function getReposBySystem(
     if (typeof system === 'string') {
       const entityRef: CompoundEntityRef = {
         name: entity.metadata.name,
-        namespace: entity.metadata.namespace || 'default',
+        namespace: entity.metadata.namespace ?? 'default',
         kind: entity.kind,
       };
 

@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: spiffe-vault
+  description: Integrates SPIFFE SVID authentication with Hashicorp Vault to retrieve a VAULT_TOKEN.
+  annotations:
+    github.com/project-slug: SEP-ArgusPanoptes/spiffe-vault
+    backstage.io/source-location: url:https://github.com/SEP-ArgusPanoptes/spiffe-vault
+    sonarcloud.io/project-key: SEP-ArgusPanoptes_spiffe-vault
+    sonarcloud.io/enabled: 'true'
+    reporting/workflows: '["CodeQL"]'
+    reporting/target-branch: main
+    preproduction/exclude: '["Dependabot.*"]'
+    azure.com/organization: argus-panoptes-dev
+    azure.com/project: project_2
+    azure.com/bugs-query-id: b2fdb928-a73e-4cba-82c9-e605a194666d
+  tags:
+    - critical
+spec:
+  type: service
+  lifecycle: experimental
+  owner: SEP-ArgusPanoptes
+  system: payments-system

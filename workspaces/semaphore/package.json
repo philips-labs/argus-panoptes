@@ -21,7 +21,7 @@
     "lint:all": "backstage-cli repo lint",
     "prettier:check": "prettier --check .",
     "new": "backstage-cli new --scope @philips-labs --no-private",
-    "build:api-reports": "yarn build:api-reports:only --tsc --exclude node_modules",
+    "build:api-reports": "yarn tsc:full && yarn build:api-reports:only --exclude node_modules",
     "build:api-reports:only": "backstage-repo-tools api-reports -o ae-wrong-input-file-type --validate-release-tags",
     "prettier:write": "prettier --write ."
   },
