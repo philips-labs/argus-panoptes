@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import { Header, Page, Content, HeaderLabel } from '@backstage/core-components';
 import { DoraDashboard } from '../DoraDashboard';
 
-export const ExampleComponent = () => (
+export const DashboardComponent = () => (
   <Page themeId="tool">
     <Header
       title="DORA Metrics Dashboard"

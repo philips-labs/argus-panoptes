@@ -191,7 +191,7 @@ export function useMetricsData(
  * Example component demonstrating how to fetch and display DORA metrics data
  * This component provides a UI for selecting projects, aggregation type, and viewing the raw data
  */
-export const ExampleFetchComponent = () => {
+export const FetchMetricsComponent = () => {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [aggregation, setAggregation] = useState<'daily' | 'monthly'>(
     'monthly',

@@ -1,0 +1,1 @@
+export { FetchMetricsComponent } from './FetchMetricsComponent';
