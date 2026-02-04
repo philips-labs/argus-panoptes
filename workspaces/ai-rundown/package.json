@@ -71,7 +71,7 @@
     "@backstage/plugin-tech-insights": "^0.3.27",
     "@backstage/plugin-techdocs-backend": "^2.0.2",
     "@google/genai": "^1.0.0",
-    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@mui/icons-material": "^7.1.0",
     "react": "^16.13.1 || ^17.0.0 || ^18.0.0"
   }
